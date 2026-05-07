@@ -4,10 +4,10 @@
 
 `cr3-keywords` is a privacy-first, local AI keywording and captioning pipeline for Canon `.cr3` photos.
 
-The main goal of this project is to create keywords and captions from `.cr3` files using a local LLM to preserve privacy.
+The main goal of this project is to create keywords and captions from `.cr3` files using a local LLM with LM Studio to preserve privacy.
 
 - Built around a Go CLI (`cr3`) for a fast, reproducible workflow.
-- Pipeline remains: **CR3 -> JPG -> TXT -> XMP**.
+- Pipeline is: **CR3 -> JPG -> TXT -> XMP**.
 - Progress bar and colored step output are preserved.
 - Logging uses Go structured logging (`log/slog`) instead of `println`.
 - Intermediate directories (`jpgs`, `outputs`, `tmp`) are written under the macOS temp folder:
@@ -19,42 +19,65 @@ The main goal of this project is to create keywords and captions from `.cr3` fil
 
 ## Requirements
 
-- macOS
-- [goenv](https://github.com/go-nv/goenv)
-- Go `1.22.5` (see `.go-version`)
 - `exiftool` (used to extract CR3 preview image)
 - LM Studio running local API server on `http://localhost:1234`
-
-Install tooling:
-
-```bash
-brew install goenv exiftool
-
-goenv install
-goenv local
-# only needed for IDEs
-goenv global 1.22.5
-```
-
-Build using the Makefile (uses `CGO_ENABLED=0` by default):
-
-```bash
-make tidy
-make build
-```
-
-Install globally (default path `/usr/local/bin`):
-
-```bash
-make install
-# use sudo if needed for permissions
-# sudo make install
-```
 
 Start LM Studio server:
 
 ```bash
 lms start server
+```
+
+## Install via package managers
+
+### Homebrew (macOS/Linux)
+
+```bash
+brew tap gobbi9/tap https://github.com/gobbi9/tap
+brew install cr3-keywords
+```
+
+### Scoop (Windows)
+
+```bash
+scoop bucket add gobbi9 https://github.com/gobbi9/scoop-bucket
+scoop install gobbi9/cr3-keywords
+```
+
+## Install prebuilt binaries (GitHub Releases)
+
+If you don't want to build from source, download a release binary from:
+
+- https://github.com/gobbi9/cr3-keywords/releases/latest
+
+Assets are published as:
+
+- `cr3_<version>_darwin-arm64` (macOS Apple Silicon)
+- `cr3_<version>_darwin-amd64` (macOS Intel)
+- `cr3_<version>_linux-amd64` (Linux x86_64)
+- `cr3_<version>_windows-amd64.exe` (Windows x86_64)
+
+Quick install examples:
+
+```bash
+# macOS / Linux
+# Pick one ASSET value:
+#   darwin-arm64   (macOS Apple Silicon)
+#   darwin-amd64   (macOS Intel)
+#   linux-amd64    (Linux x86_64)
+VERSION=0.1.0
+ASSET=darwin-arm64
+curl -L -o cr3 "https://github.com/gobbi9/cr3-keywords/releases/download/v${VERSION}/cr3_${VERSION}_${ASSET}"
+chmod +x cr3
+sudo mv cr3 /usr/local/bin/cr3
+```
+
+```bash
+# Windows (PowerShell)
+$version = "0.1.0"
+Invoke-WebRequest -Uri "https://github.com/gobbi9/cr3-keywords/releases/download/v$version/cr3_${version}_windows-amd64.exe" -OutFile "cr3.exe"
+# Move cr3.exe to a folder in PATH, for example:
+# Move-Item .\cr3.exe "$env:USERPROFILE\bin\cr3.exe"
 ```
 
 ---
@@ -148,3 +171,39 @@ cr3 clear
 3. Confirm import.
 
 XMP files are written next to your CR3 files. After the import, you should delete the XMP files, using the `clear` command.
+
+---
+
+## Development
+
+- macOS/Linux
+- [goenv](https://github.com/go-nv/goenv)
+- Go `1.22.5` (see `.go-version`)
+- `exiftool` (used to extract CR3 preview image)
+- LM Studio running local API server on `http://localhost:1234`
+
+Install tooling:
+
+```bash
+brew install goenv exiftool
+
+goenv install
+goenv local
+# only needed for IDEs
+goenv global 1.22.5
+```
+
+Build using the Makefile (uses `CGO_ENABLED=0` by default):
+
+```bash
+make tidy
+make build
+```
+
+Install globally (default path `/usr/local/bin`):
+
+```bash
+make install
+# use sudo if needed for permissions
+# sudo make install
+```
