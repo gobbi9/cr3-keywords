@@ -2,14 +2,11 @@
 
 set -u
 
-xml_escape() {
-  local s="$1"
-  s=${s//&/&amp;}
-  s=${s//</&lt;}
-  s=${s//>/&gt;}
-  s=${s//\"/&quot;}
-  s=${s//\'/&apos;}
-  print -r -- "$s"
+VERBOSE=0
+DRY_RUN=0
+
+log_verbose() {
+  (( VERBOSE == 1 )) && echo "$*"
 }
 
 expand_path() {
@@ -22,15 +19,58 @@ expand_path() {
   print -r -- "$p"
 }
 
+xml_escape() {
+  local s="$1"
+  s=${s//&/&amp;}
+  s=${s//</&lt;}
+  s=${s//>/&gt;}
+  s=${s//\"/&quot;}
+  s=${s//\'/&apos;}
+  print -r -- "$s"
+}
+
+render_progress() {
+  local current="$1"
+  local total="$2"
+  local width=30
+
+  (( total <= 0 )) && total=1
+
+  local filled=$(( current * width / total ))
+  local empty=$(( width - filled ))
+
+  local filled_bar
+  local empty_bar
+  filled_bar=$(printf '%*s' "$filled" '' | tr ' ' '#')
+  empty_bar=$(printf '%*s' "$empty" '' | tr ' ' '-')
+
+  printf '\r[%s%s] %d/%d' "$filled_bar" "$empty_bar" "$current" "$total"
+  (( current == total )) && printf '\n'
+}
+
 cr3_to_jpgs() {
   local jpg_dir="$1"
   shift
 
-  mkdir -p "$jpg_dir"
+  local -a files
+  files=("$@")
 
-  for f in "$@"; do
+  if [[ ${#files[@]} -eq 0 ]]; then
+    echo "❌ No CR3 files to convert"
+    return 1
+  fi
+
+  (( DRY_RUN == 0 )) && mkdir -p "$jpg_dir"
+
+  local total=${#files[@]}
+  local idx=0
+
+  for f in "${files[@]}"; do
+    ((idx++))
+
     [[ -f "$f" ]] || {
-      echo "Skipping missing file: $f"
+      log_verbose "Skipping missing file: $f"
+      render_progress "$idx" "$total"
       continue
     }
 
@@ -38,17 +78,23 @@ cr3_to_jpgs() {
     local out="$jpg_dir/${base}.jpg"
 
     if [[ -f "$out" ]]; then
-      echo "Skipping $f (JPG exists)"
+      log_verbose "Skipping $f (JPG exists)"
+      render_progress "$idx" "$total"
       continue
     fi
 
-    echo "Processing $f..."
+    if (( DRY_RUN == 1 )); then
+      log_verbose "[dry-run] Would generate JPG: $out"
+      render_progress "$idx" "$total"
+      continue
+    fi
 
     local tmp="$jpg_dir/${base}_tmp.jpg"
 
     if ! exiftool -b -PreviewImage "$f" > "$tmp"; then
       echo "❌ Failed to extract preview image from: $f"
       rm -f "$tmp"
+      render_progress "$idx" "$total"
       continue
     fi
 
@@ -63,6 +109,7 @@ cr3_to_jpgs() {
     esac
 
     rm -f "$tmp"
+    render_progress "$idx" "$total"
   done
 }
 
@@ -83,17 +130,20 @@ lm_caption_single() {
     return 1
   }
 
-  mkdir -p "$output_dir" "$tmp_dir"
-
   local base="${img:t:r}"
   local out="$output_dir/${base}.txt"
 
   if [[ -f "$out" ]]; then
-    echo "Skipping $img (TXT exists)"
+    log_verbose "Skipping $img (TXT exists)"
     return 0
   fi
 
-  echo "Processing $img..."
+  if (( DRY_RUN == 1 )); then
+    log_verbose "[dry-run] Would send request for $img and write $out"
+    return 0
+  fi
+
+  mkdir -p "$output_dir" "$tmp_dir"
 
   local b64_file="$tmp_dir/${base}.b64"
   local json_file="$tmp_dir/${base}.json"
@@ -137,8 +187,7 @@ lm_batch_caption() {
   local tmp_dir="$3"
   local model="${4:-gemma-4-e4b}"
   local prompt_file="${5:-prompt.md}"
-  local max_jobs="${6:-2}"
-  shift 6
+  shift 5
 
   local -a images
   if [[ $# -gt 0 ]]; then
@@ -148,26 +197,25 @@ lm_batch_caption() {
   fi
 
   if [[ ${#images[@]} -eq 0 ]]; then
-    echo "⚠️ No JPG files to caption"
+    echo "❌ No JPG files to caption"
     return 1
   fi
 
+  local total=${#images[@]}
+  local idx=0
+
   for img in "${images[@]}"; do
+    ((idx++))
+
     [[ -f "$img" ]] || {
-      echo "⚠️ JPG not found, skipping: $img"
+      log_verbose "Skipping missing JPG: $img"
+      render_progress "$idx" "$total"
       continue
     }
 
-    while (( $(jobs -pr | wc -l) >= max_jobs )); do
-      sleep 1
-    done
-
-    lm_caption_single "$img" "$model" "$prompt_file" "$output_dir" "$tmp_dir" &
+    lm_caption_single "$img" "$model" "$prompt_file" "$output_dir" "$tmp_dir"
+    render_progress "$idx" "$total"
   done
-
-  wait
-
-  echo "✅ All jobs completed"
 }
 
 txt_to_xmp() {
@@ -183,20 +231,34 @@ txt_to_xmp() {
   fi
 
   if [[ ${#txt_files[@]} -eq 0 ]]; then
-    echo "⚠️ No txt files to convert"
+    echo "❌ No TXT files to convert"
     return 1
   fi
 
+  local total=${#txt_files[@]}
+  local idx=0
+
   for txt in "${txt_files[@]}"; do
+    ((idx++))
+
     [[ -f "$txt" ]] || {
-      echo "⚠️ TXT not found, skipping: $txt"
+      log_verbose "Skipping missing TXT: $txt"
+      render_progress "$idx" "$total"
       continue
     }
+
     local base="${txt:t:r}"
     local xmp_file="$xmp_dir/$base.xmp"
 
     if [[ -f "$xmp_file" ]]; then
-      echo "Skipping $base (XMP exists)"
+      log_verbose "Skipping $base (XMP exists)"
+      render_progress "$idx" "$total"
+      continue
+    fi
+
+    if (( DRY_RUN == 1 )); then
+      log_verbose "[dry-run] Would write XMP: $xmp_file"
+      render_progress "$idx" "$total"
       continue
     fi
 
@@ -220,8 +282,6 @@ txt_to_xmp() {
       [[ -n "$keyword" ]] || continue
       xmp_keywords+="<rdf:li>$(xml_escape "$keyword")</rdf:li>"
     done
-
-    echo "Writing $xmp_file"
 
     cat > "$xmp_file" <<EOF
 <x:xmpmeta xmlns:x="adobe:ns:meta/">
@@ -248,6 +308,8 @@ txt_to_xmp() {
  </rdf:RDF>
 </x:xmpmeta>
 EOF
+
+    render_progress "$idx" "$total"
   done
 }
 
@@ -272,7 +334,9 @@ cr3_to_xmp_pipeline() {
   local output_dir="outputs/$folder_name"
   local tmp_dir="tmp/$folder_name"
 
-  mkdir -p "$jpg_dir" "$output_dir" "$tmp_dir"
+  if (( DRY_RUN == 0 )); then
+    mkdir -p "$jpg_dir" "$output_dir" "$tmp_dir"
+  fi
 
   local -a files
   files=("$@")
@@ -295,7 +359,7 @@ cr3_to_xmp_pipeline() {
       if [[ -f "$candidate" ]]; then
         cr3_files+=("$candidate")
       else
-        echo "⚠️ File not found, skipping: $candidate"
+        log_verbose "Skipping missing CR3: $candidate"
       fi
     done
   fi
@@ -318,7 +382,7 @@ cr3_to_xmp_pipeline() {
   cr3_to_jpgs "$jpg_dir" "${cr3_files[@]}" || return 1
 
   echo "=== Step 2: JPG → TXT ==="
-  lm_batch_caption "$jpg_dir" "$output_dir" "$tmp_dir" "$model" "$prompt_file" 2 "${selected_jpgs[@]}" || return 1
+  lm_batch_caption "$jpg_dir" "$output_dir" "$tmp_dir" "$model" "$prompt_file" "${selected_jpgs[@]}" || return 1
 
   echo "=== Step 3: TXT → XMP ==="
   txt_to_xmp "$output_dir" "$cr3_path" "${selected_txts[@]}" || return 1
@@ -329,10 +393,15 @@ cr3_to_xmp_pipeline() {
 usage() {
   cat <<'EOF'
 Usage:
-  ./cr3-keyword.sh <cr3_path>
-  ./cr3-keyword.sh <cr3_path> IMG_0150.CR3
-  ./cr3-keyword.sh <cr3_path> IMG_0150.CR3 IMG_0151.CR3
-  ./cr3-keyword.sh <model> <prompt_file> <cr3_path> IMG_0150.CR3 IMG_0151.CR3
+  ./cr3-keyword.sh [--verbose] [--dry-run] <cr3_path>
+  ./cr3-keyword.sh [--verbose] [--dry-run] <cr3_path> IMG_0150.CR3
+  ./cr3-keyword.sh [--verbose] [--dry-run] <cr3_path> IMG_0150.CR3 IMG_0151.CR3
+  ./cr3-keyword.sh [--verbose] [--dry-run] <model> <prompt_file> <cr3_path> IMG_0150.CR3 IMG_0151.CR3
+
+Flags:
+  -v, --verbose   Print detailed per-file logs
+  -n, --dry-run   Simulate actions without writing files or sending requests
+  -h, --help      Show this help
 EOF
 }
 
@@ -340,6 +409,35 @@ main() {
   local model="gemma-4-e4b"
   local prompt_file="prompt.md"
   local cr3_path=""
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -v|--verbose)
+        VERBOSE=1
+        shift
+        ;;
+      -n|--dry-run)
+        DRY_RUN=1
+        shift
+        ;;
+      -h|--help)
+        usage
+        return 0
+        ;;
+      --)
+        shift
+        break
+        ;;
+      -*)
+        echo "❌ Unknown flag: $1"
+        usage
+        return 1
+        ;;
+      *)
+        break
+        ;;
+    esac
+  done
 
   if [[ $# -lt 1 ]]; then
     usage

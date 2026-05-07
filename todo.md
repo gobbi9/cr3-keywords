@@ -1,16 +1,6 @@
-Example argument for zsh shell script:
-cr3_path=~/Pictures/raw/braunschweig-20260503
-
-- jpgs should be saved in the `./jpgs/braunschweig-20260503` directory
-- txt outputs should be saved in the `./outputs/braunschweig-20260503` directory
-- tmp files should be saved in the `./tmp/braunschweig-20260503` directory
-- xmp files should be saved in the `~/Pictures/raw/braunschweig-20260503` directory
-
-Usages:
-
-```bash
-./cr3-keyword.sh <cr3_path>
-./cr3-keyword.sh <cr3_path> IMG_0150.CR3 IMG_0151.CR3
-./cr3-keyword.sh gemma-4-e4b prompt.md <cr3_path> IMG_0150.CR3 IMG_0151.CR3
-./cr3-keyword.sh "~/Pictures/raw/braunschweig-20260503" IMG_0150.CR3
-```
+- Remove parallel logic, makes debugging harder
+- Add progress bar for each step and only keep one `echo` at the start of each step, other should only print out if the flag --verbose is set
+- Add `--dry-run` flag that does not create any output files or send any requests
+- Update usage command accordingly
+- Update `Local LLM Keywording.md` accordingly, also remove the bash snippets from it to improve clarity; add the chmod +x step to execute the script in a proper location
+- Test by running the following script the new flags: `./cr3-keyword.sh "~/Pictures/raw/braunschweig-20260503" IMG_0150.CR3`
