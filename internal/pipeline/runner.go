@@ -78,7 +78,7 @@ func (r *Runner) Run(ctx context.Context) error {
 	stepColor := color.New(color.FgHiCyan, color.Bold)
 
 	stepColor.Println("=== Step 1: CR3 → JPG ===")
-	if err := cr3ToJPGs(ctx, r.logger, progress, jpgDir, cr3Files, r.opts.DryRun); err != nil {
+	if err := cr3ToJPGs(ctx, r.logger, progress, jpgDir, cr3Files, r.opts.DryRun, r.opts.UseExif); err != nil {
 		return err
 	}
 

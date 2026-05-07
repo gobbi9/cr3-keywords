@@ -19,7 +19,6 @@ The main goal of this project is to create keywords and captions from `.cr3` fil
 
 ## Requirements
 
-- `exiftool` (used to extract CR3 preview image)
 - LM Studio running local API server on `http://localhost:1234`
 
 Start LM Studio server:
@@ -27,6 +26,10 @@ Start LM Studio server:
 ```bash
 lms start server
 ```
+
+`cr3` extracts embedded CR3 JPEG previews using a built-in pure-Go path.
+`exiftool` is optional and used as a fallback if built-in extraction fails for a file.
+You can force `exiftool` mode with `--exif` (often faster, requires `exiftool` in `PATH`).
 
 ## Install via package managers
 
@@ -139,8 +142,11 @@ cr3 --dry-run <cr3_path>
 cr3 --edit-prompt <cr3_path>
 cr3 --model qwen2.5-vl <cr3_path>
 cr3 --prompt ~/.cr3-keywords/prompt.md <cr3_path>
+cr3 --exif <cr3_path>
 cr3 --help
 ```
+
+`--exif` forces CR3 preview extraction via `exiftool` (fast path when available).
 
 ### Show version
 
@@ -179,13 +185,15 @@ XMP files are written next to your CR3 files. After the import, you should delet
 - macOS/Linux
 - [goenv](https://github.com/go-nv/goenv)
 - Go `1.22.5` (see `.go-version`)
-- `exiftool` (used to extract CR3 preview image)
 - LM Studio running local API server on `http://localhost:1234`
+- Optional: `exiftool` (fallback when built-in CR3 preview extraction fails, or required when using `--exif`)
 
 Install tooling:
 
 ```bash
-brew install goenv exiftool
+brew install goenv
+# optional (fallback / --exif mode):
+# brew install exiftool
 
 goenv install
 goenv local

@@ -5,10 +5,8 @@ import (
 	"context"
 	"fmt"
 	"image"
-	"io"
 	"log/slog"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -16,7 +14,7 @@ import (
 	"github.com/rwcarlsen/goexif/exif"
 )
 
-func cr3ToJPGs(ctx context.Context, logger *slog.Logger, progress *ProgressBar, jpgDir string, files []string, dryRun bool) error {
+func cr3ToJPGs(ctx context.Context, logger *slog.Logger, progress *ProgressBar, jpgDir string, files []string, dryRun bool, useExif bool) error {
 	if len(files) == 0 {
 		return fmt.Errorf("no CR3 files to convert")
 	}
@@ -44,7 +42,7 @@ func cr3ToJPGs(ctx context.Context, logger *slog.Logger, progress *ProgressBar, 
 			continue
 		}
 
-		preview, err := extractPreviewImage(ctx, f)
+		preview, err := extractPreviewImage(ctx, f, useExif)
 		if err != nil {
 			logger.Error("failed to extract preview image", "file", f, "error", err)
 			progress.Render(idx+1, total)
@@ -58,7 +56,7 @@ func cr3ToJPGs(ctx context.Context, logger *slog.Logger, progress *ProgressBar, 
 			continue
 		}
 
-		orientation := readOrientation(preview)
+		orientation := readOrientation(ctx, f, preview)
 		img = applyOrientation(img, orientation)
 		img = imaging.Fit(img, 2000, 2000, imaging.Lanczos)
 
@@ -74,33 +72,11 @@ func cr3ToJPGs(ctx context.Context, logger *slog.Logger, progress *ProgressBar, 
 	return nil
 }
 
-func extractPreviewImage(ctx context.Context, cr3Path string) ([]byte, error) {
-	cmd := exec.CommandContext(ctx, "exiftool", "-b", "-PreviewImage", cr3Path)
-	stdout, err := cmd.StdoutPipe()
-	if err != nil {
-		return nil, err
-	}
-	if err := cmd.Start(); err != nil {
-		return nil, err
+func readOrientation(ctx context.Context, cr3Path string, preview []byte) int {
+	if o, err := readOrientationFromCR3(ctx, cr3Path); err == nil {
+		return o
 	}
 
-	b, readErr := io.ReadAll(stdout)
-	waitErr := cmd.Wait()
-	if readErr != nil {
-		return nil, readErr
-	}
-	if waitErr != nil {
-		return nil, waitErr
-	}
-
-	if len(b) == 0 {
-		return nil, fmt.Errorf("empty preview image stream")
-	}
-
-	return b, nil
-}
-
-func readOrientation(preview []byte) int {
 	x, err := exif.Decode(bytes.NewReader(preview))
 	if err != nil {
 		return 1
@@ -118,12 +94,22 @@ func readOrientation(preview []byte) int {
 
 func applyOrientation(img image.Image, orientation int) image.Image {
 	switch orientation {
+	case 2:
+		return imaging.FlipH(img)
 	case 3:
 		return imaging.Rotate180(img)
+	case 4:
+		return imaging.FlipV(img)
+	case 5:
+		return imaging.Transpose(img)
 	case 6:
-		return imaging.Rotate90(img)
-	case 8:
+		// EXIF 6 means display image rotated 90° clockwise.
 		return imaging.Rotate270(img)
+	case 7:
+		return imaging.Transverse(img)
+	case 8:
+		// EXIF 8 means display image rotated 270° clockwise (90° counter-clockwise).
+		return imaging.Rotate90(img)
 	default:
 		return img
 	}

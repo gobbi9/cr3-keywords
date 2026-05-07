@@ -15,6 +15,7 @@ type Options struct {
 	Version    bool
 	EditPrompt bool
 	Clear      bool
+	UseExif    bool
 
 	Model      string
 	PromptPath string
@@ -50,6 +51,8 @@ func Parse(args []string) (Options, error) {
 			opts.Version = true
 		case "-e", "--edit-prompt":
 			opts.EditPrompt = true
+		case "--exif":
+			opts.UseExif = true
 		case "-m", "--model":
 			i++
 			if i >= len(args) {
@@ -122,9 +125,9 @@ func Parse(args []string) (Options, error) {
 
 func Usage() string {
 	return `Usage:
-  cr3 [--verbose] [--dry-run] [--model MODEL] [--prompt ~/.cr3-keywords/prompt.md] [--edit-prompt] <cr3_path>
-  cr3 [--verbose] [--dry-run] [--model MODEL] [--prompt ~/.cr3-keywords/prompt.md] [--edit-prompt] <cr3_path> IMG_0150.CR3
-  cr3 [--verbose] [--dry-run] [--model MODEL] [--prompt ~/.cr3-keywords/prompt.md] [--edit-prompt] <cr3_path> IMG_0150.CR3 IMG_0151.CR3
+  cr3 [--verbose] [--dry-run] [--model MODEL] [--prompt ~/.cr3-keywords/prompt.md] [--edit-prompt] [--exif] <cr3_path>
+  cr3 [--verbose] [--dry-run] [--model MODEL] [--prompt ~/.cr3-keywords/prompt.md] [--edit-prompt] [--exif] <cr3_path> IMG_0150.CR3
+  cr3 [--verbose] [--dry-run] [--model MODEL] [--prompt ~/.cr3-keywords/prompt.md] [--edit-prompt] [--exif] <cr3_path> IMG_0150.CR3 IMG_0151.CR3
   cr3 [--verbose] [--dry-run] <model> <prompt_file> <cr3_path> IMG_0150.CR3 IMG_0151.CR3
   cr3 clear
   cr3 version
@@ -136,6 +139,7 @@ Flags:
   -m, --model         Optional model name (if omitted, auto-detected)
   -p, --prompt        Prompt file path (default: ~/.cr3-keywords/prompt.md)
   -e, --edit-prompt   Open prompt file in terminal editor before running
+      --exif          Force exiftool for CR3 preview extraction (faster, requires exiftool)
   -h, --help          Show this help
       --version       Show version and exit
 
