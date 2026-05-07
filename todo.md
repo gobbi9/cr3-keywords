@@ -1,6 +1,14 @@
-- Remove parallel logic, makes debugging harder
-- Add progress bar for each step and only keep one `echo` at the start of each step, other should only print out if the flag --verbose is set
-- Add `--dry-run` flag that does not create any output files or send any requests
-- Update usage command accordingly
-- Update `Local LLM Keywording.md` accordingly, also remove the bash snippets from it to improve clarity; add the chmod +x step to execute the script in a proper location
-- Test by running the following script the new flags: `./cr3-keyword.sh "~/Pictures/raw/braunschweig-20260503" IMG_0150.CR3`
+- Transform cr3-keyword.sh into a go cli project
+- Use goenv (already installed) to manage the go environment, go itself is not installed globally and it must not, I prefer to use goenv
+- Do not delete cr3-keyword.sh, keep it as a reference for now
+- Use this projects root directory for the go project
+- Divide the zsh functions into separate go files according to their functionality
+- jpgs/, outputs/ and tmp/ directories should be saved to macos /tmp/<choose an appropriate path for this go cli> folder, copy current jpgs/, outputs/ and tmp/ files from the local folders to future /tmp/<choose an appropriate path for this go cli>/jpgs folder and so on
+- Keep same flags, functionalily, specially the progress bar as cr3-keyword.sh, use colored output
+- prompt.md should be read from home directory, and should be editable by the user in the terminal with a flag
+- Use proper logging insted of println
+- Use lm studio go sdk if one exists, otherwise call lms cli to check which models are available and loaded and pick the first one
+- Make then the model an optional parameter, and remove the hardcoded string as the fallback
+- Use go libraries as replacement for imagemagick, exiftool and jq, if possible
+- Only test the go project with --dry-run and "~/Pictures/raw/braunschweig-20260503" as input path
+- Update README.md accordingly

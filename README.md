@@ -1,100 +1,127 @@
-# Local Lightroom AI Keywording Pipeline
+# Local Lightroom AI Keywording Pipeline (Go CLI)
 
 ## Overview
 
-`cr3-keyword.sh` converts Canon `.CR3` files to JPEG previews, sends them to your local LM Studio model for keyword/caption generation, and writes `.xmp` metadata files for Lightroom.
+This project now includes a Go CLI (`cr3-keyword`) that replaces the original shell pipeline while preserving behavior and flags.
+
+- `cr3-keyword.sh` is still kept in this repository as reference.
+- Pipeline remains: **CR3 -> JPG -> TXT -> XMP**.
+- Progress bar and colored step output are preserved.
+- Logging uses Go structured logging (`log/slog`) instead of `println`.
+- Intermediate directories (`jpgs`, `outputs`, `tmp`) are written under macOS temp folder:
+  - `/tmp/cr3-keywords/jpgs/<folder>`
+  - `/tmp/cr3-keywords/outputs/<folder>`
+  - `/tmp/cr3-keywords/tmp/<folder>`
 
 ---
 
 ## Requirements
 
-Install dependencies:
+- macOS
+- [goenv](https://github.com/go-nv/goenv)
+- Go `1.22.5` (see `.go-version`)
+- `exiftool` (used to extract CR3 preview image)
+- LM Studio running local API server on `http://localhost:1234`
 
-```/dev/null/install.sh#L1-1
-brew install imagemagick exiftool jq
+Install tooling:
+
+```bash
+brew install goenv exiftool
+
+goenv install
+goenv local
+```
+
+Then install Go dependencies:
+
+```bash
+go mod tidy
+go build -o bin/cr3-keyword ./cmd/cr3-keyword
 ```
 
 Start LM Studio server:
 
-```/dev/null/lms.sh#L1-1
+```bash
 lms start server
 ```
 
 ---
 
-## Setup
+## Prompt file behavior
 
-From the project directory:
+- Default prompt file is `~/prompt.md`.
+- You can override with `--prompt`.
+- You can edit prompt in terminal before processing with `--edit-prompt`.
+  - Uses `$EDITOR`, defaults to `nano`.
 
-```/dev/null/setup.sh#L1-2
-chmod +x ./cr3-keyword.sh
-ls -l ./cr3-keyword.sh
-```
+---
 
-Create or edit your prompt file (default: `prompt.md`).
+## Model selection
+
+Model is optional.
+
+If not provided, the CLI auto-detects available models in this order:
+1. LM Studio HTTP API (`GET /v1/models`)
+2. `lms ls --json`
+
+Then it picks the best model using a simple vision-priority scoring heuristic.
+
+You can force a specific model with `--model` or positional `<model>`.
 
 ---
 
 ## Usage
 
-### Default model + default prompt
+### Default auto model + default prompt
 
-```/dev/null/usage.sh#L1-1
-./cr3-keyword.sh <cr3_path>
+```bash
+./bin/cr3-keyword <cr3_path>
 ```
 
 ### Process selected files only
 
-```/dev/null/usage.sh#L3-3
-./cr3-keyword.sh <cr3_path> IMG_0150.CR3 IMG_0151.CR3
+```bash
+./bin/cr3-keyword <cr3_path> IMG_0150.CR3 IMG_0151.CR3
 ```
 
-### Custom model + custom prompt
+### Custom model + prompt (flags)
 
-```/dev/null/usage.sh#L5-5
-./cr3-keyword.sh <model> <prompt_file> <cr3_path> IMG_0150.CR3 IMG_0151.CR3
+```bash
+./bin/cr3-keyword --model qwen2.5-vl --prompt ~/prompt.md <cr3_path> IMG_0150.CR3
+```
+
+### Legacy positional model + prompt mode
+
+```bash
+./bin/cr3-keyword <model> <prompt_file> <cr3_path> IMG_0150.CR3 IMG_0151.CR3
 ```
 
 ### Flags
 
-```/dev/null/usage.sh#L7-10
-./cr3-keyword.sh --verbose <cr3_path> IMG_0150.CR3
-./cr3-keyword.sh --dry-run <cr3_path> IMG_0150.CR3
-./cr3-keyword.sh --verbose --dry-run <cr3_path> IMG_0150.CR3
-./cr3-keyword.sh --help
+```bash
+./bin/cr3-keyword --verbose <cr3_path> IMG_0150.CR3
+./bin/cr3-keyword --dry-run <cr3_path>
+./bin/cr3-keyword --edit-prompt <cr3_path>
+./bin/cr3-keyword --model qwen2.5-vl <cr3_path>
+./bin/cr3-keyword --prompt ~/prompt.md <cr3_path>
+./bin/cr3-keyword --help
 ```
 
 ---
 
-## Output locations
+## Notes on external tools/libraries
 
-For input path:
-
-`~/Pictures/raw/braunschweig-20260503`
-
-The script uses:
-
-- JPEGs: `./jpgs/braunschweig-20260503`
-- TXT outputs: `./outputs/braunschweig-20260503`
-- TMP files: `./tmp/braunschweig-20260503`
-- XMP files: `~/Pictures/raw/braunschweig-20260503`
-
----
-
-## Runtime behavior
-
-- Steps run sequentially (no parallel processing)
-- One headline is printed at start of each step
-- Progress bar is shown during each step
-- Per-file logs are shown only with `--verbose`
-- `--dry-run` performs no file writes and sends no API requests
+- Replaced ImageMagick with Go image processing (`github.com/disintegration/imaging`).
+- Replaced `jq` usage with native Go JSON handling.
+- Replaced most shell logic with native Go implementations.
+- `exiftool` is still used specifically for CR3 preview extraction (practical fallback for CR3 support).
 
 ---
 
 ## Lightroom import
 
-1. Select files (or press `Cmd + A`)
-2. Right click → **Metadata** → **Read Metadata from File(s)**
-3. Confirm import
+1. Select files in Lightroom (`Cmd + A` for all).
+2. Right click -> **Metadata** -> **Read Metadata from File(s)**.
+3. Confirm import.
 
-You can delete `.xmp` files afterwards if desired.
+XMP files are written next to your CR3 files.

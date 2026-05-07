@@ -1,4 +1,5 @@
-jpgs/
-outputs/
-tmp/
+/bin/
+/dist/
+*.test
+*.out
 .DS_Store
