@@ -1,0 +1,117 @@
+package cli
+
+import (
+	"bufio"
+	"fmt"
+	"io"
+	"os"
+	"path/filepath"
+	"strings"
+)
+
+func SaveLastRunCR3Path(cr3Path string) error {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return fmt.Errorf("resolve home directory: %w", err)
+	}
+
+	abs, err := filepath.Abs(cr3Path)
+	if err != nil {
+		return fmt.Errorf("resolve absolute CR3 path: %w", err)
+	}
+
+	stateFile := lastRunPathFile(home)
+	if err := os.MkdirAll(filepath.Dir(stateFile), 0o755); err != nil {
+		return fmt.Errorf("create state directory: %w", err)
+	}
+	if err := os.WriteFile(stateFile, []byte(abs+"\n"), 0o644); err != nil {
+		return fmt.Errorf("write state file: %w", err)
+	}
+
+	return nil
+}
+
+func ClearLastRunXMP(in io.Reader, out io.Writer) (int, error) {
+	cr3Path, err := loadLastRunCR3Path()
+	if err != nil {
+		return 0, err
+	}
+
+	entries, err := os.ReadDir(cr3Path)
+	if err != nil {
+		return 0, fmt.Errorf("read CR3 path: %w", err)
+	}
+
+	xmpFiles := make([]string, 0)
+	for _, e := range entries {
+		if e.IsDir() {
+			continue
+		}
+		if strings.HasSuffix(strings.ToLower(e.Name()), ".xmp") {
+			xmpFiles = append(xmpFiles, filepath.Join(cr3Path, e.Name()))
+		}
+	}
+
+	fmt.Fprintf(out, "Found %d .xmp file(s) in %s\n", len(xmpFiles), cr3Path)
+	if len(xmpFiles) == 0 {
+		return 0, nil
+	}
+
+	fmt.Fprintf(out, "Delete all %d file(s)? [y/N]: ", len(xmpFiles))
+	scanner := bufio.NewScanner(in)
+	if !scanner.Scan() {
+		if err := scanner.Err(); err != nil {
+			return 0, fmt.Errorf("read confirmation: %w", err)
+		}
+		fmt.Fprintln(out, "Clear cancelled.")
+		return 0, nil
+	}
+
+	confirm := strings.ToLower(strings.TrimSpace(scanner.Text()))
+	if confirm != "y" && confirm != "yes" {
+		fmt.Fprintln(out, "Clear cancelled.")
+		return 0, nil
+	}
+
+	deleted := 0
+	for _, p := range xmpFiles {
+		if err := os.Remove(p); err != nil {
+			return deleted, fmt.Errorf("delete %s: %w", p, err)
+		}
+		deleted++
+	}
+
+	return deleted, nil
+}
+
+func loadLastRunCR3Path() (string, error) {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", fmt.Errorf("resolve home directory: %w", err)
+	}
+
+	b, err := os.ReadFile(lastRunPathFile(home))
+	if err != nil {
+		if os.IsNotExist(err) {
+			return "", fmt.Errorf("no previous run found; execute cr3-keyword with a CR3 path first")
+		}
+		return "", fmt.Errorf("read state file: %w", err)
+	}
+
+	p := strings.TrimSpace(string(b))
+	if p == "" {
+		return "", fmt.Errorf("last run CR3 path is empty")
+	}
+	if st, err := os.Stat(p); err != nil || !st.IsDir() {
+		if err != nil {
+			return "", fmt.Errorf("last run CR3 path is not accessible: %w", err)
+		}
+		return "", fmt.Errorf("last run CR3 path is not a directory: %s", p)
+	}
+
+	return p, nil
+}
+
+func lastRunPathFile(home string) string {
+	return filepath.Join(home, ".cr3-keywords", "last-run-cr3-path.txt")
+}

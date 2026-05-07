@@ -30,13 +30,15 @@ brew install goenv exiftool
 
 goenv install
 goenv local
+# only needed for IDEs
+goenv global 1.22.5
 ```
 
-Then install Go dependencies:
+Build using the Makefile (uses `CGO_ENABLED=0` by default):
 
 ```bash
-go mod tidy
-go build -o bin/cr3-keyword ./cmd/cr3-keyword
+make tidy
+make build
 ```
 
 Start LM Studio server:
@@ -49,7 +51,7 @@ lms start server
 
 ## Prompt file behavior
 
-- Default prompt file is `~/prompt.md`.
+- Default prompt file is `~/.cr3-keywords/prompt.md`.
 - You can override with `--prompt`.
 - You can edit prompt in terminal before processing with `--edit-prompt`.
   - Uses `$EDITOR`, defaults to `nano`.
@@ -87,7 +89,7 @@ You can force a specific model with `--model` or positional `<model>`.
 ### Custom model + prompt (flags)
 
 ```bash
-./bin/cr3-keyword --model qwen2.5-vl --prompt ~/prompt.md <cr3_path> IMG_0150.CR3
+./bin/cr3-keyword --model qwen2.5-vl --prompt ~/.cr3-keywords/prompt.md <cr3_path> IMG_0150.CR3
 ```
 
 ### Legacy positional model + prompt mode
@@ -103,9 +105,20 @@ You can force a specific model with `--model` or positional `<model>`.
 ./bin/cr3-keyword --dry-run <cr3_path>
 ./bin/cr3-keyword --edit-prompt <cr3_path>
 ./bin/cr3-keyword --model qwen2.5-vl <cr3_path>
-./bin/cr3-keyword --prompt ~/prompt.md <cr3_path>
+./bin/cr3-keyword --prompt ~/.cr3-keywords/prompt.md <cr3_path>
 ./bin/cr3-keyword --help
 ```
+
+### Clear generated XMP files from last run
+
+```bash
+./bin/cr3-keyword clear
+```
+
+- Uses the CR3 folder from the last successful run.
+- Finds all `.xmp` files in that folder.
+- Asks for confirmation before deleting.
+- Prints the number of deleted files.
 
 ---
 
@@ -124,4 +137,4 @@ You can force a specific model with `--model` or positional `<model>`.
 2. Right click -> **Metadata** -> **Read Metadata from File(s)**.
 3. Confirm import.
 
-XMP files are written next to your CR3 files.
+XMP files are written next to your CR3 files. After the import, you should delete the XMP files, using the `clear` command.

@@ -13,6 +13,7 @@ type Options struct {
 	DryRun     bool
 	Help       bool
 	EditPrompt bool
+	Clear      bool
 
 	Model      string
 	PromptPath string
@@ -28,9 +29,10 @@ func Parse(args []string) (Options, error) {
 		return Options{}, fmt.Errorf("resolve home directory: %w", err)
 	}
 
+	defaultPromptPath := filepath.Join(home, ".cr3-keywords", "prompt.md")
 	opts := Options{
 		Model:      defaultModel,
-		PromptPath: filepath.Join(home, "prompt.md"),
+		PromptPath: defaultPromptPath,
 	}
 
 	rest := make([]string, 0, len(args))
@@ -76,6 +78,11 @@ func Parse(args []string) (Options, error) {
 		return Options{}, errors.New("missing required arguments\n\n" + Usage())
 	}
 
+	if len(rest) == 1 && rest[0] == "clear" {
+		opts.Clear = true
+		return opts, nil
+	}
+
 	first := expandPath(rest[0], home)
 	if isDir(first) {
 		opts.CR3Path = first
@@ -88,7 +95,7 @@ func Parse(args []string) (Options, error) {
 	if opts.Model != "" {
 		return Options{}, errors.New("do not mix --model with positional <model> argument")
 	}
-	if opts.PromptPath != filepath.Join(home, "prompt.md") {
+	if opts.PromptPath != defaultPromptPath {
 		return Options{}, errors.New("do not mix --prompt with positional <prompt_file> argument")
 	}
 	if len(rest) < 3 {
@@ -107,18 +114,22 @@ func Parse(args []string) (Options, error) {
 
 func Usage() string {
 	return `Usage:
-  cr3-keyword [--verbose] [--dry-run] [--model MODEL] [--prompt ~/prompt.md] [--edit-prompt] <cr3_path>
-  cr3-keyword [--verbose] [--dry-run] [--model MODEL] [--prompt ~/prompt.md] [--edit-prompt] <cr3_path> IMG_0150.CR3
-  cr3-keyword [--verbose] [--dry-run] [--model MODEL] [--prompt ~/prompt.md] [--edit-prompt] <cr3_path> IMG_0150.CR3 IMG_0151.CR3
+  cr3-keyword [--verbose] [--dry-run] [--model MODEL] [--prompt ~/.cr3-keywords/prompt.md] [--edit-prompt] <cr3_path>
+  cr3-keyword [--verbose] [--dry-run] [--model MODEL] [--prompt ~/.cr3-keywords/prompt.md] [--edit-prompt] <cr3_path> IMG_0150.CR3
+  cr3-keyword [--verbose] [--dry-run] [--model MODEL] [--prompt ~/.cr3-keywords/prompt.md] [--edit-prompt] <cr3_path> IMG_0150.CR3 IMG_0151.CR3
   cr3-keyword [--verbose] [--dry-run] <model> <prompt_file> <cr3_path> IMG_0150.CR3 IMG_0151.CR3
+  cr3-keyword clear
 
 Flags:
   -v, --verbose       Print detailed per-file logs
   -n, --dry-run       Simulate actions without writing files or sending requests
   -m, --model         Optional model name (if omitted, auto-detected)
-  -p, --prompt        Prompt file path (default: ~/prompt.md)
+  -p, --prompt        Prompt file path (default: ~/.cr3-keywords/prompt.md)
   -e, --edit-prompt   Open prompt file in terminal editor before running
   -h, --help          Show this help
+
+Commands:
+  clear               Delete all .xmp files from the CR3 path of the last successful run
 `
 }
 

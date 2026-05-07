@@ -8,6 +8,9 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
+	"sync/atomic"
+	"time"
 
 	"cr3-keywords/internal/lm"
 )
@@ -30,6 +33,35 @@ func batchCaption(ctx context.Context, logger *slog.Logger, progress *ProgressBa
 	}
 
 	total := len(images)
+	started := time.Now()
+
+	var renderedCurrent atomic.Int64
+	var renderMu sync.Mutex
+	render := func(current int) {
+		suffix := fmt.Sprintf(" (%s)", time.Since(started).Truncate(time.Second))
+		renderMu.Lock()
+		defer renderMu.Unlock()
+		progress.RenderWithSuffix(current, total, suffix)
+	}
+
+	render(0)
+	ticker := time.NewTicker(1 * time.Second)
+	done := make(chan struct{})
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				render(int(renderedCurrent.Load()))
+			case <-done:
+				return
+			}
+		}
+	}()
+	defer func() {
+		ticker.Stop()
+		close(done)
+	}()
+
 	for idx, img := range images {
 		if !strings.HasPrefix(img, jpgDir) {
 			logger.Debug("caption input image outside jpg dir", "image", img)
@@ -40,20 +72,23 @@ func batchCaption(ctx context.Context, logger *slog.Logger, progress *ProgressBa
 
 		if _, err := os.Stat(out); err == nil {
 			logger.Debug("skipping JPG because TXT exists", "file", img)
-			progress.Render(idx+1, total)
+			renderedCurrent.Store(int64(idx + 1))
+			render(idx + 1)
 			continue
 		}
 
 		if dryRun {
 			logger.Debug("[dry-run] would caption image", "from", img, "to", out)
-			progress.Render(idx+1, total)
+			renderedCurrent.Store(int64(idx + 1))
+			render(idx + 1)
 			continue
 		}
 
 		imgBytes, err := os.ReadFile(img)
 		if err != nil {
 			logger.Error("failed to read JPG", "file", img, "error", err)
-			progress.Render(idx+1, total)
+			renderedCurrent.Store(int64(idx + 1))
+			render(idx + 1)
 			continue
 		}
 
@@ -61,17 +96,20 @@ func batchCaption(ctx context.Context, logger *slog.Logger, progress *ProgressBa
 		caption, err := client.ChatCaption(ctx, model, prompt, b64)
 		if err != nil {
 			logger.Error("failed to caption image", "file", img, "error", err)
-			progress.Render(idx+1, total)
+			renderedCurrent.Store(int64(idx + 1))
+			render(idx + 1)
 			continue
 		}
 
 		if err := os.WriteFile(out, []byte(strings.TrimSpace(caption)+"\n"), 0o644); err != nil {
 			logger.Error("failed to write TXT", "file", out, "error", err)
-			progress.Render(idx+1, total)
+			renderedCurrent.Store(int64(idx + 1))
+			render(idx + 1)
 			continue
 		}
 
-		progress.Render(idx+1, total)
+		renderedCurrent.Store(int64(idx + 1))
+		render(idx + 1)
 	}
 
 	return nil

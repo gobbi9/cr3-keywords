@@ -14,6 +14,18 @@ func NewProgressBar() *ProgressBar {
 }
 
 func (p *ProgressBar) Render(current, total int) {
+	p.RenderWithDecorations(current, total, "", "")
+}
+
+func (p *ProgressBar) RenderWithSuffix(current, total int, suffix string) {
+	p.RenderWithDecorations(current, total, "", suffix)
+}
+
+func (p *ProgressBar) RenderWithPrefix(current, total int, prefix string) {
+	p.RenderWithDecorations(current, total, prefix, "")
+}
+
+func (p *ProgressBar) RenderWithDecorations(current, total int, prefix string, suffix string) {
 	if total <= 0 {
 		total = 1
 	}
@@ -34,7 +46,7 @@ func (p *ProgressBar) Render(current, total int) {
 	gray := "\033[90m"
 	reset := "\033[0m"
 
-	fmt.Printf("\r[%s%s%s%s] %d/%d", green, filledBar, gray, emptyBar, reset, current, total)
+	fmt.Printf("\r%s[%s%s%s%s%s] %d/%d%s", prefix, green, filledBar, gray, emptyBar, reset, current, total, suffix)
 	if current == total {
 		fmt.Print("\n")
 	}

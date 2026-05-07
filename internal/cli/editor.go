@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"strings"
 )
 
 func EditPromptInTerminal(promptPath string) error {
@@ -16,7 +18,10 @@ func EditPromptInTerminal(promptPath string) error {
 		editor = "nano"
 	}
 
-	cmd := exec.Command(editor, promptPath)
+	cmd, err := editorCommand(editor, promptPath)
+	if err != nil {
+		return err
+	}
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
@@ -27,20 +32,40 @@ func EditPromptInTerminal(promptPath string) error {
 	return nil
 }
 
+func editorCommand(editor, promptPath string) (*exec.Cmd, error) {
+	parts := strings.Fields(editor)
+	if len(parts) == 0 {
+		return nil, fmt.Errorf("EDITOR is empty")
+	}
+
+	args := append(parts[1:], promptPath)
+	return exec.Command(parts[0], args...), nil
+}
+
 func ensurePromptFile(promptPath string) error {
 	if _, err := os.Stat(promptPath); err == nil {
 		return nil
+	} else if !os.IsNotExist(err) {
+		return err
+	}
+
+	if err := os.MkdirAll(filepath.Dir(promptPath), 0o755); err != nil {
+		return err
 	}
 
 	initial := `Context:
-This photo is part of a series of photos taken in Braunschweig, Germany.
+This photo is part of a series of photos.
 
 Task:
 1. Describe the image
 2. Generate 10–20 simple keywords (comma-separated)
 3. Write a short caption (1 sentence)
 
-Output should be result of task 2, empty line, result of task 3.
+Avoid generic terms like "image" or "photo".
+
+Ouput should be result of task 2, empty line, result of task 3.
+Make sure output does not contain the full description,
+only comma separated keywords in the first line, an empty line and the caption.
 `
 
 	return os.WriteFile(promptPath, []byte(initial), 0o644)

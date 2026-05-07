@@ -10,6 +10,7 @@ import (
 
 	"cr3-keywords/internal/cli"
 	"cr3-keywords/internal/lm"
+
 	"github.com/fatih/color"
 )
 
@@ -38,7 +39,10 @@ func (r *Runner) Run(ctx context.Context) error {
 			return err
 		}
 		model = auto
-		r.logger.Info("auto-detected model", "model", model)
+		r.logger.Debug("auto-detected model", "model", model)
+
+		fmt.Print("Auto-detected model: ")
+		color.New(color.FgHiYellow, color.Bold).Printf("%s\n", model)
 	}
 
 	folderName := folderNameFromPath(r.opts.CR3Path)
