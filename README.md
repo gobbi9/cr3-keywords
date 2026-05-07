@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project now includes a Go CLI (`cr3-keyword`) that replaces the original shell pipeline while preserving behavior and flags.
+This project now includes a Go CLI (`cr3`) that replaces the original shell pipeline while preserving behavior and flags.
 
 - `cr3-keyword.sh` is still kept in this repository as reference.
 - Pipeline remains: **CR3 -> JPG -> TXT -> XMP**.
@@ -41,6 +41,14 @@ make tidy
 make build
 ```
 
+Install globally (default path `/usr/local/bin`):
+
+```bash
+make install
+# use sudo if needed for permissions
+# sudo make install
+```
+
 Start LM Studio server:
 
 ```bash
@@ -77,42 +85,51 @@ You can force a specific model with `--model` or positional `<model>`.
 ### Default auto model + default prompt
 
 ```bash
-./bin/cr3-keyword <cr3_path>
+cr3 <cr3_path>
 ```
 
 ### Process selected files only
 
 ```bash
-./bin/cr3-keyword <cr3_path> IMG_0150.CR3 IMG_0151.CR3
+cr3 <cr3_path> IMG_0150.CR3 IMG_0151.CR3
 ```
 
 ### Custom model + prompt (flags)
 
 ```bash
-./bin/cr3-keyword --model qwen2.5-vl --prompt ~/.cr3-keywords/prompt.md <cr3_path> IMG_0150.CR3
+cr3 --model qwen2.5-vl --prompt ~/.cr3-keywords/prompt.md <cr3_path> IMG_0150.CR3
 ```
 
 ### Legacy positional model + prompt mode
 
 ```bash
-./bin/cr3-keyword <model> <prompt_file> <cr3_path> IMG_0150.CR3 IMG_0151.CR3
+cr3 <model> <prompt_file> <cr3_path> IMG_0150.CR3 IMG_0151.CR3
 ```
 
 ### Flags
 
 ```bash
-./bin/cr3-keyword --verbose <cr3_path> IMG_0150.CR3
-./bin/cr3-keyword --dry-run <cr3_path>
-./bin/cr3-keyword --edit-prompt <cr3_path>
-./bin/cr3-keyword --model qwen2.5-vl <cr3_path>
-./bin/cr3-keyword --prompt ~/.cr3-keywords/prompt.md <cr3_path>
-./bin/cr3-keyword --help
+cr3 --verbose <cr3_path> IMG_0150.CR3
+cr3 --dry-run <cr3_path>
+cr3 --edit-prompt <cr3_path>
+cr3 --model qwen2.5-vl <cr3_path>
+cr3 --prompt ~/.cr3-keywords/prompt.md <cr3_path>
+cr3 --help
 ```
+
+### Show version
+
+```bash
+cr3 --version
+cr3 version
+```
+
+Version output includes app version + short git commit hash + build timestamp.
 
 ### Clear generated XMP files from last run
 
 ```bash
-./bin/cr3-keyword clear
+cr3 clear
 ```
 
 - Uses the CR3 folder from the last successful run.

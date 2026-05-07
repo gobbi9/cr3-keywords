@@ -10,11 +10,19 @@ import (
 	"cr3-keywords/internal/pipeline"
 )
 
+var version = "dev"
+var buildTime = "unknown"
+
 func main() {
 	opts, err := cli.Parse(os.Args[1:])
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
+	}
+
+	if opts.Version {
+		fmt.Fprintf(os.Stdout, "%s (%s)\n", version, buildTime)
+		return
 	}
 
 	if opts.Help {

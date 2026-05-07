@@ -12,6 +12,7 @@ type Options struct {
 	Verbose    bool
 	DryRun     bool
 	Help       bool
+	Version    bool
 	EditPrompt bool
 	Clear      bool
 
@@ -45,6 +46,8 @@ func Parse(args []string) (Options, error) {
 			opts.DryRun = true
 		case "-h", "--help":
 			opts.Help = true
+		case "--version":
+			opts.Version = true
 		case "-e", "--edit-prompt":
 			opts.EditPrompt = true
 		case "-m", "--model":
@@ -70,7 +73,12 @@ func Parse(args []string) (Options, error) {
 		}
 	}
 
-	if opts.Help {
+	if opts.Help || opts.Version {
+		return opts, nil
+	}
+
+	if len(rest) == 1 && rest[0] == "version" {
+		opts.Version = true
 		return opts, nil
 	}
 
@@ -114,11 +122,13 @@ func Parse(args []string) (Options, error) {
 
 func Usage() string {
 	return `Usage:
-  cr3-keyword [--verbose] [--dry-run] [--model MODEL] [--prompt ~/.cr3-keywords/prompt.md] [--edit-prompt] <cr3_path>
-  cr3-keyword [--verbose] [--dry-run] [--model MODEL] [--prompt ~/.cr3-keywords/prompt.md] [--edit-prompt] <cr3_path> IMG_0150.CR3
-  cr3-keyword [--verbose] [--dry-run] [--model MODEL] [--prompt ~/.cr3-keywords/prompt.md] [--edit-prompt] <cr3_path> IMG_0150.CR3 IMG_0151.CR3
-  cr3-keyword [--verbose] [--dry-run] <model> <prompt_file> <cr3_path> IMG_0150.CR3 IMG_0151.CR3
-  cr3-keyword clear
+  cr3 [--verbose] [--dry-run] [--model MODEL] [--prompt ~/.cr3-keywords/prompt.md] [--edit-prompt] <cr3_path>
+  cr3 [--verbose] [--dry-run] [--model MODEL] [--prompt ~/.cr3-keywords/prompt.md] [--edit-prompt] <cr3_path> IMG_0150.CR3
+  cr3 [--verbose] [--dry-run] [--model MODEL] [--prompt ~/.cr3-keywords/prompt.md] [--edit-prompt] <cr3_path> IMG_0150.CR3 IMG_0151.CR3
+  cr3 [--verbose] [--dry-run] <model> <prompt_file> <cr3_path> IMG_0150.CR3 IMG_0151.CR3
+  cr3 clear
+  cr3 version
+  cr3 --version
 
 Flags:
   -v, --verbose       Print detailed per-file logs
@@ -127,9 +137,11 @@ Flags:
   -p, --prompt        Prompt file path (default: ~/.cr3-keywords/prompt.md)
   -e, --edit-prompt   Open prompt file in terminal editor before running
   -h, --help          Show this help
+      --version       Show version and exit
 
 Commands:
   clear               Delete all .xmp files from the CR3 path of the last successful run
+  version             Show version and exit
 `
 }
 
