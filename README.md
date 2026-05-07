@@ -2,16 +2,18 @@
 
 ## Overview
 
-This project now includes a Go CLI (`cr3`) that replaces the original shell pipeline while preserving behavior and flags.
+`cr3-keywords` is a privacy-first, local AI keywording and captioning pipeline for Canon `.cr3` photos.
 
-- `cr3-keyword.sh` is still kept in this repository as reference.
+The main goal of this project is to create keywords and captions from `.cr3` files using a local LLM to preserve privacy.
+
+- Built around a Go CLI (`cr3`) for a fast, reproducible workflow.
 - Pipeline remains: **CR3 -> JPG -> TXT -> XMP**.
 - Progress bar and colored step output are preserved.
 - Logging uses Go structured logging (`log/slog`) instead of `println`.
-- Intermediate directories (`jpgs`, `outputs`, `tmp`) are written under macOS temp folder:
-  - `/tmp/cr3-keywords/jpgs/<folder>`
-  - `/tmp/cr3-keywords/outputs/<folder>`
-  - `/tmp/cr3-keywords/tmp/<folder>`
+- Intermediate directories (`jpgs`, `outputs`, `tmp`) are written under the macOS temp folder:
+  - `$TEMPDIR/cr3-keywords/jpgs/<folder>`
+  - `$TEMPDIR/cr3-keywords/outputs/<folder>`
+  - `$TEMPDIR/cr3-keywords/tmp/<folder>`
 
 ---
 
@@ -136,15 +138,6 @@ cr3 clear
 - Finds all `.xmp` files in that folder.
 - Asks for confirmation before deleting.
 - Prints the number of deleted files.
-
----
-
-## Notes on external tools/libraries
-
-- Replaced ImageMagick with Go image processing (`github.com/disintegration/imaging`).
-- Replaced `jq` usage with native Go JSON handling.
-- Replaced most shell logic with native Go implementations.
-- `exiftool` is still used specifically for CR3 preview extraction (practical fallback for CR3 support).
 
 ---
 
