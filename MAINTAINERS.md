@@ -21,8 +21,8 @@ Tagging (`vX.Y.Z`) triggers `.github/workflows/release.yml`, which:
 
 ### Templates in this repo
 
-- `packaging/homebrew/cr3-keywords.rb.tmpl`
-- `packaging/scoop/cr3-keywords.json.tmpl`
+- `packaging/homebrew/cr3-keywords.rb`
+- `packaging/scoop/cr3-keywords.json`
 
 ### Local generation (manual)
 

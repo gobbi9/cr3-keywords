@@ -6,6 +6,9 @@ import (
 	"os"
 )
 
+// New returns a slog logger configured for stdout.
+//
+// When verbose is true, the logger uses debug level; otherwise it uses info level.
 func New(verbose bool) *slog.Logger {
 	level := slog.LevelInfo
 	if verbose {

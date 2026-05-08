@@ -5,26 +5,33 @@ import (
 	"strings"
 )
 
+// ProgressBar renders a single-line terminal progress bar.
 type ProgressBar struct {
 	width int
 }
 
+// NewProgressBar creates a ProgressBar with the default width.
 func NewProgressBar() *ProgressBar {
 	return &ProgressBar{width: 30}
 }
 
+// Render draws the progress bar for current and total units.
 func (p *ProgressBar) Render(current, total int) {
 	p.RenderWithDecorations(current, total, "", "")
 }
 
+// RenderWithSuffix draws the progress bar with trailing text.
 func (p *ProgressBar) RenderWithSuffix(current, total int, suffix string) {
 	p.RenderWithDecorations(current, total, "", suffix)
 }
 
+// RenderWithPrefix draws the progress bar with leading text.
 func (p *ProgressBar) RenderWithPrefix(current, total int, prefix string) {
 	p.RenderWithDecorations(current, total, prefix, "")
 }
 
+// RenderWithDecorations draws the progress bar with optional prefix and suffix.
+// It clamps current into [0, total] and normalizes non-positive totals.
 func (p *ProgressBar) RenderWithDecorations(current, total int, prefix string, suffix string) {
 	if total <= 0 {
 		total = 1

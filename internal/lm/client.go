@@ -13,11 +13,13 @@ import (
 	"time"
 )
 
+// Client is an LM Studio API client used for model discovery and caption requests.
 type Client struct {
 	httpClient *http.Client
 	baseURL    string
 }
 
+// NewClient creates a Client configured for a local LM Studio server.
 func NewClient() *Client {
 	return &Client{
 		httpClient: &http.Client{Timeout: 5 * time.Minute},
@@ -25,6 +27,8 @@ func NewClient() *Client {
 	}
 }
 
+// DetectBestModel discovers available models and returns the best candidate
+// using the internal vision-priority scoring heuristic.
 func (c *Client) DetectBestModel(ctx context.Context) (string, error) {
 	models, err := c.modelsFromHTTP(ctx)
 	if err == nil && len(models) > 0 {
@@ -39,6 +43,8 @@ func (c *Client) DetectBestModel(ctx context.Context) (string, error) {
 	return "", errors.New("could not detect loaded LM Studio model via HTTP or lms CLI")
 }
 
+// ChatCaption sends a multimodal chat completion request with prompt text and
+// a base64-encoded JPEG image and returns the model response content.
 func (c *Client) ChatCaption(ctx context.Context, model string, prompt string, imageBase64 string) (string, error) {
 	payload := map[string]any{
 		"model": model,

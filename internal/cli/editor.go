@@ -8,6 +8,11 @@ import (
 	"strings"
 )
 
+// EditPromptInTerminal ensures the prompt file exists and opens it in the
+// user's terminal editor.
+//
+// The editor is resolved from the EDITOR environment variable, and defaults
+// to "nano" when EDITOR is not set.
 func EditPromptInTerminal(promptPath string) error {
 	if err := ensurePromptFile(promptPath); err != nil {
 		return err

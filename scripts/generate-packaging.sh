@@ -16,7 +16,7 @@ VERSION="$1"
 DIST_DIR="dist"
 OUT_DIR="packaging/generated"
 
-if [ ! -f "packaging/homebrew/cr3-keywords.rb.tmpl" ] || [ ! -f "packaging/scoop/cr3-keywords.json.tmpl" ]; then
+if [ ! -f "packaging/homebrew/cr3-keywords.rb" ] || [ ! -f "packaging/scoop/cr3-keywords.json" ]; then
   echo "Run this script from repository root (cr3-keywords)."
   exit 1
 fi
@@ -58,13 +58,13 @@ sed \
   -e "s/{{SHA256_DARWIN_ARM64}}/${SHA256_DARWIN_ARM64}/g" \
   -e "s/{{SHA256_DARWIN_AMD64}}/${SHA256_DARWIN_AMD64}/g" \
   -e "s/{{SHA256_LINUX_AMD64}}/${SHA256_LINUX_AMD64}/g" \
-  "packaging/homebrew/cr3-keywords.rb.tmpl" \
+  "packaging/homebrew/cr3-keywords.rb" \
   > "${OUT_DIR}/cr3-keywords.rb"
 
 sed \
   -e "s/{{VERSION}}/${VERSION}/g" \
   -e "s/{{SHA256_WINDOWS_AMD64}}/${SHA256_WINDOWS_AMD64}/g" \
-  "packaging/scoop/cr3-keywords.json.tmpl" \
+  "packaging/scoop/cr3-keywords.json" \
   > "${OUT_DIR}/cr3-keywords.json"
 
 echo "Generated:"

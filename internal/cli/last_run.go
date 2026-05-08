@@ -9,6 +9,8 @@ import (
 	"strings"
 )
 
+// SaveLastRunCR3Path stores the absolute CR3 directory path from the last
+// successful run in the local state file under ~/.cr3-keywords.
 func SaveLastRunCR3Path(cr3Path string) error {
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -31,6 +33,10 @@ func SaveLastRunCR3Path(cr3Path string) error {
 	return nil
 }
 
+// ClearLastRunXMP loads the last-run CR3 directory, lists .xmp files in that
+// directory, asks for confirmation, and deletes them when confirmed.
+//
+// It returns the number of deleted files.
 func ClearLastRunXMP(in io.Reader, out io.Writer) (int, error) {
 	cr3Path, err := loadLastRunCR3Path()
 	if err != nil {

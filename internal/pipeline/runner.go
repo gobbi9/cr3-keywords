@@ -14,15 +14,18 @@ import (
 	"github.com/fatih/color"
 )
 
+// Runner coordinates execution of the CR3 -> JPG -> TXT -> XMP pipeline.
 type Runner struct {
 	opts   cli.Options
 	logger *slog.Logger
 }
 
+// NewRunner creates a pipeline Runner from CLI options and logger.
 func NewRunner(opts cli.Options, logger *slog.Logger) *Runner {
 	return &Runner{opts: opts, logger: logger}
 }
 
+// Run executes the full pipeline for the configured options.
 func (r *Runner) Run(ctx context.Context) error {
 	if err := ensureDir(r.opts.CR3Path); err != nil {
 		return fmt.Errorf("CR3 path not found: %w", err)

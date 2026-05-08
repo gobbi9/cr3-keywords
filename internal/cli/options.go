@@ -8,23 +8,37 @@ import (
 	"strings"
 )
 
+// Options contains parsed CLI flags, command mode, and positional arguments.
 type Options struct {
-	Verbose    bool
-	DryRun     bool
-	Help       bool
-	Version    bool
+	// Verbose enables debug-level logging.
+	Verbose bool
+	// DryRun simulates pipeline actions without writing files or calling the model.
+	DryRun bool
+	// Help requests usage output.
+	Help bool
+	// Version requests version output.
+	Version bool
+	// EditPrompt opens the prompt file in an editor before execution.
 	EditPrompt bool
-	Clear      bool
-	UseExif    bool
+	// Clear runs the clear command to remove last-run XMP files.
+	Clear bool
+	// UseExif forces exiftool-based CR3 preview extraction.
+	UseExif bool
 
-	Model      string
+	// Model is the selected model name. Empty means auto-detect.
+	Model string
+	// PromptPath is the path to the prompt markdown file.
 	PromptPath string
-	CR3Path    string
-	Files      []string
+	// CR3Path is the CR3 source directory path.
+	CR3Path string
+	// Files is an optional list of specific CR3 files to process.
+	Files []string
 }
 
 const defaultModel = ""
 
+// Parse converts CLI arguments into Options and validates supported command
+// forms and flag combinations.
 func Parse(args []string) (Options, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -123,6 +137,7 @@ func Parse(args []string) (Options, error) {
 	return opts, nil
 }
 
+// Usage returns the CLI help text.
 func Usage() string {
 	return `Usage:
   cr3 [--verbose] [--dry-run] [--model MODEL] [--prompt ~/.cr3-keywords/prompt.md] [--edit-prompt] [--exif] <cr3_path>
