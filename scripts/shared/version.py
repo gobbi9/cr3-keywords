@@ -5,10 +5,13 @@ from __future__ import annotations
 
 import argparse
 
+from shared.logging import logger
+
 
 def parse_version_arg(value: str) -> str:
     """Return a normalized version string without a leading 'v'."""
     version = value[1:] if value.startswith("v") else value
     if not version:
+        logger.error("Invalid --version value: %r", value)
         raise argparse.ArgumentTypeError("version cannot be empty")
     return version

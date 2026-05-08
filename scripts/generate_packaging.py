@@ -5,9 +5,9 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-import sys
 from pathlib import Path
 
+from shared.logging import logger
 from shared.version import parse_version_arg
 
 
@@ -36,7 +36,7 @@ def main() -> int:
     scoop_template = root / "packaging" / "scoop" / "cr3-keywords.json"
 
     if not homebrew_template.is_file() or not scoop_template.is_file():
-        print("Run this script from repository root (cr3-keywords).", file=sys.stderr)
+        logger.error("Run this script from repository root (cr3-keywords).")
         return 1
 
     artifacts = {
@@ -49,8 +49,8 @@ def main() -> int:
     missing = [str(path) for path in artifacts.values() if not path.is_file()]
     if missing:
         for artifact in missing:
-            print(f"Missing artifact: {artifact}", file=sys.stderr)
-        print("Download release assets into 'dist/' first.", file=sys.stderr)
+            logger.error("Missing artifact: %s", artifact)
+        logger.error("Download release assets into 'dist/' first.")
         return 1
 
     replacements = {"{{VERSION}}": version}
@@ -73,9 +73,9 @@ def main() -> int:
     homebrew_output.write_text(homebrew_text, encoding="utf-8")
     scoop_output.write_text(scoop_text, encoding="utf-8")
 
-    print("Generated:")
-    print(f"  {homebrew_output}")
-    print(f"  {scoop_output}")
+    logger.info("Generated:")
+    logger.info("  %s", homebrew_output)
+    logger.info("  %s", scoop_output)
     return 0
 
 

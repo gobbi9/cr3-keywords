@@ -7,6 +7,7 @@ import argparse
 import subprocess
 from pathlib import Path
 
+from shared.logging import logger
 from shared.version import parse_version_arg
 
 
@@ -33,7 +34,7 @@ def main() -> int:
     ]
     subprocess.run(command, check=True)
 
-    print(f"Built {output}")
+    logger.info("Built %s", output)
     return 0
 
 

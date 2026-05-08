@@ -7,9 +7,10 @@ import argparse
 import os
 import shutil
 import subprocess
-import sys
 import tempfile
 from pathlib import Path
+
+from shared.logging import logger
 
 
 def run(
@@ -28,7 +29,7 @@ def run(
 def main() -> int:
     token = os.environ.get("PACKAGING_PUSH_TOKEN", "")
     if not token:
-        print("PACKAGING_PUSH_TOKEN env var is required.", file=sys.stderr)
+        logger.error("PACKAGING_PUSH_TOKEN env var is required.")
         return 1
 
     parser = argparse.ArgumentParser(
@@ -49,7 +50,7 @@ def main() -> int:
 
     source_file = Path(args.source_file)
     if not source_file.is_file():
-        print(f"Source file not found: {source_file}", file=sys.stderr)
+        logger.error("Source file not found: %s", source_file)
         return 1
 
     run(["git", "config", "--global", "user.name", "github-actions[bot]"])
@@ -63,7 +64,7 @@ def main() -> int:
         ]
     )
 
-    print(f"Publishing {args.display_name} to {args.target_repo}")
+    logger.info("Publishing %s to %s", args.display_name, args.target_repo)
 
     with tempfile.TemporaryDirectory() as tmp:
         work_dir = Path(tmp)
@@ -82,14 +83,14 @@ def main() -> int:
             check=False,
         )
         if diff_result.returncode == 0:
-            print(f"No {args.display_name} changes to commit.")
+            logger.warning("No %s changes to commit.", args.display_name)
             return 0
 
         run(["git", "add", args.target_file], cwd=repo_dir)
         run(["git", "commit", "-m", args.commit_message], cwd=repo_dir)
         push_result = run(["git", "push"], cwd=repo_dir)
         if push_result.stdout:
-            print(push_result.stdout.strip())
+            logger.info("%s", push_result.stdout.strip())
 
     return 0
 
