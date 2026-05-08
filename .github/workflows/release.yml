@@ -99,7 +99,7 @@ jobs:
           if-no-files-found: error
 
       - name: Publish Homebrew/Scoop manifests to external repos
-        if: ${{ secrets.PACKAGING_PUSH_TOKEN != '' }}
+        if: ${{ env.PACKAGING_PUSH_TOKEN != '' }}
         env:
           PACKAGING_PUSH_TOKEN: ${{ secrets.PACKAGING_PUSH_TOKEN }}
           HOMEBREW_TAP_REPO: ${{ vars.HOMEBREW_TAP_REPO || 'gobbi9/tap' }}
