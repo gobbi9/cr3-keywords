@@ -98,48 +98,32 @@ jobs:
           path: packaging/generated/*
           if-no-files-found: error
 
-      - name: Publish Homebrew/Scoop manifests to external repos
+      - name: Publish Homebrew manifest to external repo
         if: ${{ env.PACKAGING_PUSH_TOKEN != '' }}
         env:
           PACKAGING_PUSH_TOKEN: ${{ secrets.PACKAGING_PUSH_TOKEN }}
           HOMEBREW_TAP_REPO: ${{ vars.HOMEBREW_TAP_REPO || 'gobbi9/tap' }}
+        run: |
+          set -euo pipefail
+          chmod +x scripts/publish-packaging-manifest.sh
+          ./scripts/publish-packaging-manifest.sh \
+            "${HOMEBREW_TAP_REPO}" \
+            "packaging/generated/cr3-keywords.rb" \
+            "Formula/cr3-keywords.rb" \
+            "Homebrew formula" \
+            "Update cr3-keywords formula for ${GITHUB_REF_NAME}"
+
+      - name: Publish Scoop manifest to external repo
+        if: ${{ env.PACKAGING_PUSH_TOKEN != '' }}
+        env:
+          PACKAGING_PUSH_TOKEN: ${{ secrets.PACKAGING_PUSH_TOKEN }}
           SCOOP_BUCKET_REPO: ${{ vars.SCOOP_BUCKET_REPO || 'gobbi9/scoop-bucket' }}
         run: |
           set -euo pipefail
-
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          WORK_DIR="$(mktemp -d)"
-          trap 'rm -rf "$WORK_DIR"' EXIT
-
-          echo "Publishing Homebrew formula to ${HOMEBREW_TAP_REPO}"
-          git clone "https://x-access-token:${PACKAGING_PUSH_TOKEN}@github.com/${HOMEBREW_TAP_REPO}.git" "${WORK_DIR}/homebrew-tap"
-          mkdir -p "${WORK_DIR}/homebrew-tap/Formula"
-          cp packaging/generated/cr3-keywords.rb "${WORK_DIR}/homebrew-tap/Formula/cr3-keywords.rb"
-
-          (
-            cd "${WORK_DIR}/homebrew-tap"
-            if git diff --quiet -- Formula/cr3-keywords.rb; then
-              echo "No Homebrew formula changes to commit."
-            else
-              git add Formula/cr3-keywords.rb
-              git commit -m "Update cr3-keywords formula for ${GITHUB_REF_NAME}"
-              git push
-            fi
-          )
-
-          echo "Publishing Scoop manifest to ${SCOOP_BUCKET_REPO}"
-          git clone "https://x-access-token:${PACKAGING_PUSH_TOKEN}@github.com/${SCOOP_BUCKET_REPO}.git" "${WORK_DIR}/scoop-bucket"
-          cp packaging/generated/cr3-keywords.json "${WORK_DIR}/scoop-bucket/cr3-keywords.json"
-
-          (
-            cd "${WORK_DIR}/scoop-bucket"
-            if git diff --quiet -- cr3-keywords.json; then
-              echo "No Scoop manifest changes to commit."
-            else
-              git add cr3-keywords.json
-              git commit -m "Update cr3-keywords manifest for ${GITHUB_REF_NAME}"
-              git push
-            fi
-          )
+          chmod +x scripts/publish-packaging-manifest.sh
+          ./scripts/publish-packaging-manifest.sh \
+            "${SCOOP_BUCKET_REPO}" \
+            "packaging/generated/cr3-keywords.json" \
+            "cr3-keywords.json" \
+            "Scoop manifest" \
+            "Update cr3-keywords manifest for ${GITHUB_REF_NAME}"
