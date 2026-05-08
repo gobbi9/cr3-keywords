@@ -27,9 +27,8 @@ Tagging (`vX.Y.Z`) triggers `.github/workflows/release.yml`, which:
 ### Local generation (manual)
 
 ```bash
-# from repo root
-chmod +x scripts/generate-packaging.sh
-./scripts/generate-packaging.sh 0.1.0
+# from repo root (required)
+uv run scripts/generate_packaging.py --version 0.1.0
 ```
 
 Outputs:

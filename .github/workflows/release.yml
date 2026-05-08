@@ -43,18 +43,18 @@ jobs:
         with:
           go-version-file: go.mod
 
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+
       - name: Build binary
         run: |
           set -euo pipefail
-
-          VERSION="${GITHUB_REF_NAME#v}"
-          OUTPUT="dist/cr3_${VERSION}_${{ matrix.asset_suffix }}${{ matrix.ext }}"
-
-          make build \
-            VERSION="${VERSION}" \
-            OUT="${OUTPUT}" \
-            GOOS="${{ matrix.goos }}" \
-            GOARCH="${{ matrix.goarch }}"
+          uv run scripts/build_binary.py \
+            --goos "${{ matrix.goos }}" \
+            --goarch "${{ matrix.goarch }}" \
+            --asset-suffix "${{ matrix.asset_suffix }}" \
+            --ext "${{ matrix.ext }}" \
+            --version "${GITHUB_REF_NAME}"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -77,6 +77,9 @@ jobs:
           path: dist
           merge-multiple: true
 
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+
       - name: Publish release assets
         uses: softprops/action-gh-release@v2
         with:
@@ -87,9 +90,7 @@ jobs:
       - name: Generate Homebrew/Scoop manifests
         run: |
           set -euo pipefail
-          chmod +x scripts/generate-packaging.sh
-          VERSION="${GITHUB_REF_NAME#v}"
-          ./scripts/generate-packaging.sh "${VERSION}"
+          uv run scripts/generate_packaging.py --version "${GITHUB_REF_NAME}"
 
       - name: Upload packaging manifests
         uses: actions/upload-artifact@v4
@@ -105,13 +106,12 @@ jobs:
           HOMEBREW_TAP_REPO: ${{ vars.HOMEBREW_TAP_REPO || 'gobbi9/tap' }}
         run: |
           set -euo pipefail
-          chmod +x scripts/publish-packaging-manifest.sh
-          ./scripts/publish-packaging-manifest.sh \
-            "${HOMEBREW_TAP_REPO}" \
-            "packaging/generated/cr3-keywords.rb" \
-            "Formula/cr3-keywords.rb" \
-            "Homebrew formula" \
-            "Update cr3-keywords formula for ${GITHUB_REF_NAME}"
+          uv run scripts/publish_packaging_manifest.py \
+            --target-repo "${HOMEBREW_TAP_REPO}" \
+            --source-file "packaging/generated/cr3-keywords.rb" \
+            --target-file "Formula/cr3-keywords.rb" \
+            --display-name "Homebrew formula" \
+            --commit-message "Update cr3-keywords formula for ${GITHUB_REF_NAME}"
 
       - name: Publish Scoop manifest to external repo
         if: ${{ env.PACKAGING_PUSH_TOKEN != '' }}
@@ -120,10 +120,9 @@ jobs:
           SCOOP_BUCKET_REPO: ${{ vars.SCOOP_BUCKET_REPO || 'gobbi9/scoop-bucket' }}
         run: |
           set -euo pipefail
-          chmod +x scripts/publish-packaging-manifest.sh
-          ./scripts/publish-packaging-manifest.sh \
-            "${SCOOP_BUCKET_REPO}" \
-            "packaging/generated/cr3-keywords.json" \
-            "cr3-keywords.json" \
-            "Scoop manifest" \
-            "Update cr3-keywords manifest for ${GITHUB_REF_NAME}"
+          uv run scripts/publish_packaging_manifest.py \
+            --target-repo "${SCOOP_BUCKET_REPO}" \
+            --source-file "packaging/generated/cr3-keywords.json" \
+            --target-file "cr3-keywords.json" \
+            --display-name "Scoop manifest" \
+            --commit-message "Update cr3-keywords manifest for ${GITHUB_REF_NAME}"
