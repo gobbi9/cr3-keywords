@@ -51,6 +51,7 @@ func ensurePromptFile(promptPath string) error {
 	if _, err := os.Stat(promptPath); err == nil {
 		return nil
 	} else if !os.IsNotExist(err) {
+		// if the real error is not "file does not exist", return it
 		return err
 	}
 
@@ -58,7 +59,7 @@ func ensurePromptFile(promptPath string) error {
 		return err
 	}
 
-	initial := `Context:
+	defaultPrompt := `Context:
 This photo is part of a series of photos.
 
 Task:
@@ -73,5 +74,5 @@ Make sure output does not contain the full description,
 only comma separated keywords in the first line, an empty line and the caption.
 `
 
-	return os.WriteFile(promptPath, []byte(initial), 0o644)
+	return os.WriteFile(promptPath, []byte(defaultPrompt), 0o644)
 }

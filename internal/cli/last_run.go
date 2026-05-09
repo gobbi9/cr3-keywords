@@ -43,18 +43,15 @@ func ClearLastRunXMP(in io.Reader, out io.Writer) (int, error) {
 		return 0, err
 	}
 
-	entries, err := os.ReadDir(cr3Path)
+	paths, err := os.ReadDir(cr3Path)
 	if err != nil {
 		return 0, fmt.Errorf("read CR3 path: %w", err)
 	}
 
 	xmpFiles := make([]string, 0)
-	for _, e := range entries {
-		if e.IsDir() {
-			continue
-		}
-		if strings.HasSuffix(strings.ToLower(e.Name()), ".xmp") {
-			xmpFiles = append(xmpFiles, filepath.Join(cr3Path, e.Name()))
+	for _, path := range paths {
+		if !path.IsDir() && strings.HasSuffix(strings.ToLower(path.Name()), ".xmp") {
+			xmpFiles = append(xmpFiles, filepath.Join(cr3Path, path.Name()))
 		}
 	}
 
@@ -80,9 +77,9 @@ func ClearLastRunXMP(in io.Reader, out io.Writer) (int, error) {
 	}
 
 	deleted := 0
-	for _, p := range xmpFiles {
-		if err := os.Remove(p); err != nil {
-			return deleted, fmt.Errorf("delete %s: %w", p, err)
+	for _, xmpFile := range xmpFiles {
+		if err := os.Remove(xmpFile); err != nil {
+			return deleted, fmt.Errorf("delete %s: %w", xmpFile, err)
 		}
 		deleted++
 	}
@@ -96,7 +93,7 @@ func loadLastRunCR3Path() (string, error) {
 		return "", fmt.Errorf("resolve home directory: %w", err)
 	}
 
-	b, err := os.ReadFile(lastRunPathFile(home))
+	lastRunPathRaw, err := os.ReadFile(lastRunPathFile(home))
 	if err != nil {
 		if os.IsNotExist(err) {
 			return "", fmt.Errorf("no previous run found; execute cr3-keyword with a CR3 path first")
@@ -104,18 +101,18 @@ func loadLastRunCR3Path() (string, error) {
 		return "", fmt.Errorf("read state file: %w", err)
 	}
 
-	p := strings.TrimSpace(string(b))
-	if p == "" {
+	lastRunPath := strings.TrimSpace(string(lastRunPathRaw))
+	if lastRunPath == "" {
 		return "", fmt.Errorf("last run CR3 path is empty")
 	}
-	if st, err := os.Stat(p); err != nil || !st.IsDir() {
+	if st, err := os.Stat(lastRunPath); err != nil || !st.IsDir() {
 		if err != nil {
 			return "", fmt.Errorf("last run CR3 path is not accessible: %w", err)
 		}
-		return "", fmt.Errorf("last run CR3 path is not a directory: %s", p)
+		return "", fmt.Errorf("last run CR3 path is not a directory: %s", lastRunPath)
 	}
 
-	return p, nil
+	return lastRunPath, nil
 }
 
 func lastRunPathFile(home string) string {

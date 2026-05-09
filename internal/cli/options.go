@@ -35,8 +35,6 @@ type Options struct {
 	Files []string
 }
 
-const defaultModel = ""
-
 // Parse converts CLI arguments into Options and validates supported command
 // forms and flag combinations.
 func Parse(args []string) (Options, error) {
@@ -47,7 +45,6 @@ func Parse(args []string) (Options, error) {
 
 	defaultPromptPath := filepath.Join(home, ".cr3-keywords", "prompt.md")
 	opts := Options{
-		Model:      defaultModel,
 		PromptPath: defaultPromptPath,
 	}
 
