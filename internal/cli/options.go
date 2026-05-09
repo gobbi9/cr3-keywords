@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-// Options contains parsed CLI flags, command mode, and positional arguments.
+// Options contains parsed CLI flags, command mode, and optional file filters.
 type Options struct {
 	// Verbose enables debug-level logging.
 	Verbose bool
@@ -108,30 +108,9 @@ func Parse(args []string) (Options, error) {
 		return opts, nil
 	}
 
-	first := expandPath(rest[0], home)
-	if isDir(first) {
-		opts.CR3Path = first
-		if len(rest) > 1 {
-			opts.Files = rest[1:]
-		}
-		return opts, nil
-	}
-
-	if opts.Model != "" {
-		return Options{}, errors.New("do not mix --model with positional <model> argument")
-	}
-	if opts.PromptPath != defaultPromptPath {
-		return Options{}, errors.New("do not mix --prompt with positional <prompt_file> argument")
-	}
-	if len(rest) < 3 {
-		return Options{}, errors.New("invalid arguments\n\n" + Usage())
-	}
-
-	opts.Model = rest[0]
-	opts.PromptPath = expandPath(rest[1], home)
-	opts.CR3Path = expandPath(rest[2], home)
-	if len(rest) > 3 {
-		opts.Files = rest[3:]
+	opts.CR3Path = expandPath(rest[0], home)
+	if len(rest) > 1 {
+		opts.Files = rest[1:]
 	}
 
 	return opts, nil
@@ -143,7 +122,6 @@ func Usage() string {
   cr3 [--verbose] [--dry-run] [--model MODEL] [--prompt ~/.cr3-keywords/prompt.md] [--edit-prompt] [--exif] <cr3_path>
   cr3 [--verbose] [--dry-run] [--model MODEL] [--prompt ~/.cr3-keywords/prompt.md] [--edit-prompt] [--exif] <cr3_path> IMG_0150.CR3
   cr3 [--verbose] [--dry-run] [--model MODEL] [--prompt ~/.cr3-keywords/prompt.md] [--edit-prompt] [--exif] <cr3_path> IMG_0150.CR3 IMG_0151.CR3
-  cr3 [--verbose] [--dry-run] <model> <prompt_file> <cr3_path> IMG_0150.CR3 IMG_0151.CR3
   cr3 clear
   cr3 version
   cr3 --version
@@ -172,12 +150,4 @@ func expandPath(p, home string) string {
 		return filepath.Join(home, p[2:])
 	}
 	return p
-}
-
-func isDir(p string) bool {
-	st, err := os.Stat(p)
-	if err != nil {
-		return false
-	}
-	return st.IsDir()
 }

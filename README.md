@@ -104,7 +104,7 @@ If not provided, the CLI auto-detects available models in this order:
 
 Then it picks the best model using a simple vision-priority scoring heuristic.
 
-You can force a specific model with `--model` or positional `<model>`.
+You can force a specific model with `--model`.
 
 ---
 
@@ -126,12 +126,6 @@ cr3 <cr3_path> IMG_0150.CR3 IMG_0151.CR3
 
 ```bash
 cr3 --model qwen2.5-vl --prompt ~/.cr3-keywords/prompt.md <cr3_path> IMG_0150.CR3
-```
-
-### Legacy positional model + prompt mode
-
-```bash
-cr3 <model> <prompt_file> <cr3_path> IMG_0150.CR3 IMG_0151.CR3
 ```
 
 ### Flags
