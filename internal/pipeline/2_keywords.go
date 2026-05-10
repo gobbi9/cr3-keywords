@@ -15,9 +15,9 @@ import (
 	"cr3-keywords/internal/lm"
 )
 
-func batchCaption(ctx context.Context, logger *slog.Logger, progress *ProgressBar, client *lm.Client, jpgDir string, outputDir string, model string, promptFile string, images []string, dryRun bool) error {
+func batchKeywords(ctx context.Context, logger *slog.Logger, progress *ProgressBar, lmClient *lm.Client, jpgDir string, outputDir string, model string, promptFile string, images []string, dryRun bool) error {
 	if len(images) == 0 {
-		return fmt.Errorf("no JPG files to caption")
+		return fmt.Errorf("no JPG files to keyword")
 	}
 
 	promptBytes, err := os.ReadFile(promptFile)
@@ -64,7 +64,7 @@ func batchCaption(ctx context.Context, logger *slog.Logger, progress *ProgressBa
 
 	for idx, img := range images {
 		if !strings.HasPrefix(img, jpgDir) {
-			logger.Debug("caption input image outside jpg dir", "image", img)
+			logger.Debug("keyword input image outside jpg dir", "image", img)
 		}
 
 		base := strings.TrimSuffix(filepath.Base(img), filepath.Ext(img))
@@ -93,15 +93,15 @@ func batchCaption(ctx context.Context, logger *slog.Logger, progress *ProgressBa
 		}
 
 		b64 := base64.StdEncoding.EncodeToString(imgBytes)
-		caption, err := client.ChatCaption(ctx, model, prompt, b64)
+		keywordsCaption, err := lmClient.PromptWithImage(ctx, model, prompt, b64)
 		if err != nil {
-			logger.Error("failed to caption image", "file", img, "error", err)
+			logger.Error("failed to keyword image", "file", img, "error", err)
 			renderedCurrent.Store(int64(idx + 1))
 			render(idx + 1)
 			continue
 		}
 
-		if err := os.WriteFile(out, []byte(strings.TrimSpace(caption)+"\n"), 0o644); err != nil {
+		if err := os.WriteFile(out, []byte(strings.TrimSpace(keywordsCaption)+"\n"), 0o644); err != nil {
 			logger.Error("failed to write TXT", "file", out, "error", err)
 			renderedCurrent.Store(int64(idx + 1))
 			render(idx + 1)

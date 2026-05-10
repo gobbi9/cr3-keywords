@@ -19,10 +19,6 @@ func EditPromptInTerminal(promptPath string) error {
 	}
 
 	editor := os.Getenv("EDITOR")
-	if editor == "" {
-		editor = "nano"
-	}
-
 	cmd, err := editorCommand(editor, promptPath)
 	if err != nil {
 		return err
@@ -37,18 +33,9 @@ func EditPromptInTerminal(promptPath string) error {
 	return nil
 }
 
-func editorCommand(editor, promptPath string) (*exec.Cmd, error) {
-	parts := strings.Fields(editor)
-	if len(parts) == 0 {
-		return nil, fmt.Errorf("EDITOR is empty")
-	}
-
-	args := append(parts[1:], promptPath)
-	return exec.Command(parts[0], args...), nil
-}
-
 func ensurePromptFile(promptPath string) error {
 	if _, err := os.Stat(promptPath); err == nil {
+		// does not check if the file is empty
 		return nil
 	} else if !os.IsNotExist(err) {
 		// if the real error is not "file does not exist", return it
@@ -75,4 +62,14 @@ only comma separated keywords in the first line, an empty line and the caption.
 `
 
 	return os.WriteFile(promptPath, []byte(defaultPrompt), 0o644)
+}
+
+func editorCommand(editor, promptPath string) (*exec.Cmd, error) {
+	parts := strings.Fields(editor)
+	if len(parts) == 0 {
+		return nil, fmt.Errorf("EDITOR is empty")
+	}
+
+	args := append(parts[1:], promptPath)
+	return exec.Command(parts[0], args...), nil
 }

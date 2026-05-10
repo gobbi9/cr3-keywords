@@ -86,7 +86,7 @@ func (r *Runner) Run(ctx context.Context) error {
 	}
 
 	stepColor.Println("=== Step 2: JPG → TXT ===")
-	if err := batchCaption(ctx, r.logger, progress, lmClient, jpgDir, outputDir, model, r.opts.PromptPath, selectedJPGs, r.opts.DryRun); err != nil {
+	if err := batchKeywords(ctx, r.logger, progress, lmClient, jpgDir, outputDir, model, r.opts.PromptPath, selectedJPGs, r.opts.DryRun); err != nil {
 		return err
 	}
 
@@ -154,4 +154,9 @@ func ensureFile(p string) error {
 		return fmt.Errorf("expected file but got directory: %s", p)
 	}
 	return nil
+}
+
+func folderNameFromPath(p string) string {
+	clean := filepath.Clean(p)
+	return filepath.Base(clean)
 }

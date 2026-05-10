@@ -37,7 +37,7 @@ func txtToXMP(logger *slog.Logger, progress *ProgressBar, txtDir string, xmpDir 
 			continue
 		}
 
-		keywords, caption := parseCaptionTXT(string(content))
+		keywords, caption := parseKeywordsCaptionTxt(string(content))
 		xmp := buildXMP(keywords, caption)
 
 		if err := os.WriteFile(xmpFile, []byte(xmp), 0o644); err != nil {
@@ -53,7 +53,7 @@ func txtToXMP(logger *slog.Logger, progress *ProgressBar, txtDir string, xmpDir 
 	return nil
 }
 
-func parseCaptionTXT(content string) ([]string, string) {
+func parseKeywordsCaptionTxt(content string) ([]string, string) {
 	content = strings.ReplaceAll(content, "\r\n", "\n")
 	lines := strings.Split(content, "\n")
 	if len(lines) == 0 {
@@ -121,4 +121,15 @@ func buildXMP(keywords []string, caption string) string {
  </rdf:RDF>
 </x:xmpmeta>
 `, captionEscaped, captionEscaped, keywordItems.String())
+}
+
+func xmlEscape(s string) string {
+	replacer := strings.NewReplacer(
+		"&", "&amp;",
+		"<", "&lt;",
+		">", "&gt;",
+		"\"", "&quot;",
+		"'", "&apos;",
+	)
+	return replacer.Replace(s)
 }

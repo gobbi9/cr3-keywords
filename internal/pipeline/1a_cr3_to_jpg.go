@@ -3,10 +3,12 @@ package pipeline
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"image"
 	"log/slog"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -90,6 +92,33 @@ func readOrientation(ctx context.Context, cr3Path string, preview []byte) int {
 		return 1
 	}
 	return o
+}
+
+func readOrientationFromCR3(ctx context.Context, cr3Path string) (int, error) {
+	if _, err := exec.LookPath("exiftool"); err != nil {
+		return 0, fmt.Errorf("exiftool not found in PATH")
+	}
+
+	cmd := exec.CommandContext(ctx, "exiftool", "-Orientation", "-n", "-s", "-s", "-s", cr3Path)
+	out, err := cmd.Output()
+	if err != nil {
+		return 0, err
+	}
+
+	s := bytes.TrimSpace(out)
+	if len(s) == 0 {
+		return 0, errors.New("empty orientation output")
+	}
+
+	var orientation int
+	if _, err := fmt.Sscanf(string(s), "%d", &orientation); err != nil {
+		return 0, fmt.Errorf("parse orientation: %w", err)
+	}
+	if orientation < 1 || orientation > 8 {
+		return 0, fmt.Errorf("invalid orientation value: %d", orientation)
+	}
+
+	return orientation, nil
 }
 
 func applyOrientation(img image.Image, orientation int) image.Image {

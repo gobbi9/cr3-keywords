@@ -43,9 +43,9 @@ func (c *Client) DetectBestModel(ctx context.Context) (string, error) {
 	return "", errors.New("could not detect loaded LM Studio model via HTTP or lms CLI")
 }
 
-// ChatCaption sends a multimodal chat completion request with prompt text and
+// PromptWithImage sends a multimodal chat completion request with prompt text and
 // a base64-encoded JPEG image and returns the model response content.
-func (c *Client) ChatCaption(ctx context.Context, model string, prompt string, imageBase64 string) (string, error) {
+func (c *Client) PromptWithImage(ctx context.Context, model string, prompt string, imageBase64 string) (string, error) {
 	payload := map[string]any{
 		"model": model,
 		"messages": []any{
