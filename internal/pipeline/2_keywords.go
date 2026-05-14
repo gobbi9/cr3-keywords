@@ -15,7 +15,7 @@ import (
 	"cr3-keywords/internal/lm"
 )
 
-func batchKeywords(ctx context.Context, logger *slog.Logger, progress *ProgressBar, lmClient *lm.Client, jpgDir string, outputDir string, model string, promptFile string, images []string, dryRun bool) error {
+func batchKeywords(ctx context.Context, logger *slog.Logger, progress *ProgressBar, lmClient *lm.Client, jpgDir string, outputDir string, model string, promptFile string, images []string, geoByBase map[string]GeoMetadata, dryRun bool) error {
 	if len(images) == 0 {
 		return fmt.Errorf("no JPG files to keyword")
 	}
@@ -92,8 +92,14 @@ func batchKeywords(ctx context.Context, logger *slog.Logger, progress *ProgressB
 			continue
 		}
 
+		effectivePrompt := prompt
+		if geo, ok := geoByBase[base]; ok {
+			effectivePrompt = prependGeoContext(prompt, geo)
+		}
+		logger.Debug("sending prompt to LM Studio", "server", "http://localhost:1234", "image", img, "prompt", effectivePrompt)
+
 		b64 := base64.StdEncoding.EncodeToString(imgBytes)
-		keywordsCaption, err := lmClient.PromptWithImage(ctx, model, prompt, b64)
+		keywordsCaption, err := lmClient.PromptWithImage(ctx, model, effectivePrompt, b64)
 		if err != nil {
 			logger.Error("failed to keyword image", "file", img, "error", err)
 			renderedCurrent.Store(int64(idx + 1))

@@ -34,7 +34,14 @@ func (r *Runner) Run(ctx context.Context) error {
 		return fmt.Errorf("prompt file not found: %w", err)
 	}
 
-	lmClient := lm.NewClient()
+	gpsPath, useGPS, err := r.resolveGPSPath()
+	if err != nil {
+		return err
+	}
+
+	r.logger.Debug("exif extraction mode", "use_exif", r.opts.UseExif)
+
+	lmClient := lm.NewClient(r.logger)
 	model := r.opts.Model
 	if strings.TrimSpace(model) == "" {
 		auto, err := lmClient.DetectBestModel(ctx)
@@ -69,6 +76,14 @@ func (r *Runner) Run(ctx context.Context) error {
 		return fmt.Errorf("no CR3 files found to process")
 	}
 
+	geoByBase := map[string]GeoMetadata{}
+	if useGPS {
+		geoByBase, err = BuildGeoMetadata(ctx, r.logger, cr3Files, gpsPath)
+		if err != nil {
+			return err
+		}
+	}
+
 	selectedJPGs := make([]string, 0, len(cr3Files))
 	selectedTXTs := make([]string, 0, len(cr3Files))
 	for _, cr3 := range cr3Files {
@@ -86,12 +101,12 @@ func (r *Runner) Run(ctx context.Context) error {
 	}
 
 	stepColor.Println("=== Step 2: JPG → TXT ===")
-	if err := batchKeywords(ctx, r.logger, progress, lmClient, jpgDir, outputDir, model, r.opts.PromptPath, selectedJPGs, r.opts.DryRun); err != nil {
+	if err := batchKeywords(ctx, r.logger, progress, lmClient, jpgDir, outputDir, model, r.opts.PromptPath, selectedJPGs, geoByBase, r.opts.DryRun); err != nil {
 		return err
 	}
 
 	stepColor.Println("=== Step 3: TXT → XMP ===")
-	if err := txtToXMP(r.logger, progress, outputDir, r.opts.CR3Path, selectedTXTs, r.opts.DryRun); err != nil {
+	if err := txtToXMP(r.logger, progress, outputDir, r.opts.CR3Path, selectedTXTs, geoByBase, r.opts.DryRun); err != nil {
 		return err
 	}
 
@@ -154,6 +169,23 @@ func ensureFile(p string) error {
 		return fmt.Errorf("expected file but got directory: %s", p)
 	}
 	return nil
+}
+
+func (r *Runner) resolveGPSPath() (string, bool, error) {
+	if r.opts.GPSProvided {
+		if err := ensureFile(r.opts.GPSPath); err != nil {
+			return "", false, fmt.Errorf("GPS file not found: %w", err)
+		}
+		return r.opts.GPSPath, true, nil
+	}
+
+	if err := ensureFile(r.opts.GPSPath); err == nil {
+		return r.opts.GPSPath, true, nil
+	} else if os.IsNotExist(err) {
+		return "", false, nil
+	} else {
+		return "", false, fmt.Errorf("GPS file error: %w", err)
+	}
 }
 
 func folderNameFromPath(p string) string {

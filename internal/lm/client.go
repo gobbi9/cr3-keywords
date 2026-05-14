@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"log/slog"
 	"net/http"
 	"os/exec"
 	"sort"
@@ -17,13 +19,15 @@ import (
 type Client struct {
 	httpClient *http.Client
 	baseURL    string
+	logger     *slog.Logger
 }
 
 // NewClient creates a Client configured for a local LM Studio server.
-func NewClient() *Client {
+func NewClient(logger *slog.Logger) *Client {
 	return &Client{
 		httpClient: &http.Client{Timeout: 5 * time.Minute},
 		baseURL:    "http://localhost:1234",
+		logger:     logger,
 	}
 }
 
@@ -81,6 +85,14 @@ func (c *Client) PromptWithImage(ctx context.Context, model string, prompt strin
 	}
 	defer resp.Body.Close()
 
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("read chat response body: %w", err)
+	}
+	if c.logger != nil {
+		c.logger.Debug("LM Studio response body", "server", c.baseURL, "status", resp.StatusCode, "body", string(bodyBytes))
+	}
+
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return "", fmt.Errorf("lm studio chat returned status %d", resp.StatusCode)
 	}
@@ -92,7 +104,7 @@ func (c *Client) PromptWithImage(ctx context.Context, model string, prompt strin
 			} `json:"message"`
 		} `json:"choices"`
 	}
-	if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {
+	if err := json.Unmarshal(bodyBytes, &out); err != nil {
 		return "", fmt.Errorf("decode chat response: %w", err)
 	}
 	if len(out.Choices) == 0 {

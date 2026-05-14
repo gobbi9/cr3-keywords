@@ -31,12 +31,12 @@ func main() {
 	}
 
 	if opts.Clear {
-		deleted, err := cli.ClearLastRunXMP(os.Stdin, os.Stdout)
+		deleted, err := cli.ClearMatchedFiles(opts.CR3Path, opts.Files)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
-		fmt.Fprintf(os.Stdout, "Deleted %d .xmp file(s).\n", deleted)
+		fmt.Fprintf(os.Stdout, "Deleted %d file(s).\n", deleted)
 		return
 	}
 

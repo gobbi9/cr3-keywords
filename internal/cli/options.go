@@ -20,10 +20,14 @@ type Options struct {
 	Version bool
 	// EditPrompt opens the prompt file in an editor before execution.
 	EditPrompt bool
-	// Clear runs the clear command to remove last-run XMP files.
+	// Clear removes generated .jpg/.txt and sidecar .xmp files for matching CR3 files.
 	Clear bool
 	// UseExif forces exiftool-based CR3 preview extraction.
 	UseExif bool
+	// GPSPath is the path to the GPX track file.
+	GPSPath string
+	// GPSProvided tracks whether --gps was explicitly provided by user.
+	GPSProvided bool
 
 	// Model is the selected model name. Empty means auto-detect.
 	Model string
@@ -44,8 +48,10 @@ func Parse(args []string) (Options, error) {
 	}
 
 	defaultPromptPath := filepath.Join(home, ".cr3-keywords", "prompt.md")
+	defaultGPSPath := filepath.Join(home, ".cr3-keywords", "track.gpx")
 	opts := Options{
 		PromptPath: defaultPromptPath,
+		GPSPath:    defaultGPSPath,
 	}
 
 	rest := make([]string, 0, len(args))
@@ -60,6 +66,8 @@ func Parse(args []string) (Options, error) {
 			opts.Help = true
 		case "--version":
 			opts.Version = true
+		case "--clear":
+			opts.Clear = true
 		case "-e", "--edit-prompt":
 			opts.EditPrompt = true
 		case "--exif":
@@ -76,6 +84,15 @@ func Parse(args []string) (Options, error) {
 				return Options{}, errors.New("missing value for --prompt")
 			}
 			opts.PromptPath = expandPath(args[i], home)
+		case "--gps":
+			opts.GPSProvided = true
+			if i+1 < len(args) {
+				next := args[i+1]
+				if !strings.HasPrefix(next, "-") {
+					i++
+					opts.GPSPath = expandPath(next, home)
+				}
+			}
 		case "--":
 			rest = append(rest, args[i+1:]...)
 			i = len(args)
@@ -91,18 +108,18 @@ func Parse(args []string) (Options, error) {
 		return opts, nil
 	}
 
-	if len(rest) == 1 && rest[0] == "version" {
-		opts.Version = true
+	if opts.Clear {
+		if len(rest) > 0 {
+			opts.CR3Path = expandPath(rest[0], home)
+		}
+		if len(rest) > 1 {
+			opts.Files = rest[1:]
+		}
 		return opts, nil
 	}
 
 	if len(rest) < 1 {
 		return Options{}, errors.New("missing required arguments\n\n" + Usage())
-	}
-
-	if len(rest) == 1 && rest[0] == "clear" {
-		opts.Clear = true
-		return opts, nil
 	}
 
 	opts.CR3Path = expandPath(rest[0], home)
@@ -116,11 +133,12 @@ func Parse(args []string) (Options, error) {
 // Usage returns the CLI help text.
 func Usage() string {
 	return `Usage:
-  cr3 [--verbose] [--dry-run] [--model MODEL] [--prompt ~/.cr3-keywords/prompt.md] [--edit-prompt] [--exif] <cr3_path>
-  cr3 [--verbose] [--dry-run] [--model MODEL] [--prompt ~/.cr3-keywords/prompt.md] [--edit-prompt] [--exif] <cr3_path> IMG_0150.CR3
-  cr3 [--verbose] [--dry-run] [--model MODEL] [--prompt ~/.cr3-keywords/prompt.md] [--edit-prompt] [--exif] <cr3_path> IMG_0150.CR3 IMG_0151.CR3
-  cr3 clear
-  cr3 version
+  cr3 [--verbose] [--dry-run] [--model MODEL] [--prompt ~/.cr3-keywords/prompt.md] [--edit-prompt] [--gps [~/.cr3-keywords/track.gpx]] [--exif] <cr3_path>
+  cr3 [--verbose] [--dry-run] [--model MODEL] [--prompt ~/.cr3-keywords/prompt.md] [--edit-prompt] [--gps [~/.cr3-keywords/track.gpx]] [--exif] <cr3_path> IMG_0150.CR3
+  cr3 [--verbose] [--dry-run] [--model MODEL] [--prompt ~/.cr3-keywords/prompt.md] [--edit-prompt] [--gps [~/.cr3-keywords/track.gpx]] [--exif] <cr3_path> IMG_0150.CR3 IMG_0151.CR3
+  cr3 --clear
+  cr3 --clear <cr3_path>
+  cr3 --clear <cr3_path> IMG_0150.CR3
   cr3 --version
 
 Flags:
@@ -129,13 +147,12 @@ Flags:
   -m, --model         Optional model name (if omitted, auto-detected)
   -p, --prompt        Prompt file path (default: ~/.cr3-keywords/prompt.md)
   -e, --edit-prompt   Open prompt file in terminal editor before running
+      --gps [PATH]    Enable GPX geotagging. Optional path (default: ~/.cr3-keywords/track.gpx)
       --exif          Force exiftool for CR3 preview extraction (faster, requires exiftool)
+      --clear         Delete generated .jpg/.txt and sidecar .xmp for matching CR3 files
   -h, --help          Show this help
       --version       Show version and exit
 
-Commands:
-  clear               Delete all .xmp files from the CR3 path of the last successful run
-  version             Show version and exit
 `
 }
 

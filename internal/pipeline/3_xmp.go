@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func txtToXMP(logger *slog.Logger, progress *ProgressBar, txtDir string, xmpDir string, txtFiles []string, dryRun bool) error {
+func txtToXMP(logger *slog.Logger, progress *ProgressBar, txtDir string, xmpDir string, txtFiles []string, geoByBase map[string]GeoMetadata, dryRun bool) error {
 	if len(txtFiles) == 0 {
 		return fmt.Errorf("no TXT files to convert")
 	}
@@ -38,7 +38,8 @@ func txtToXMP(logger *slog.Logger, progress *ProgressBar, txtDir string, xmpDir 
 		}
 
 		keywords, caption := parseKeywordsCaptionTxt(string(content))
-		xmp := buildXMP(keywords, caption)
+		geo := geoByBase[base]
+		xmp := buildXMP(keywords, caption, geo)
 
 		if err := os.WriteFile(xmpFile, []byte(xmp), 0o644); err != nil {
 			logger.Error("failed to write XMP", "file", xmpFile, "error", err)
@@ -88,7 +89,7 @@ func parseKeywordsCaptionTxt(content string) ([]string, string) {
 	return keywords, caption
 }
 
-func buildXMP(keywords []string, caption string) string {
+func buildXMP(keywords []string, caption string, geo GeoMetadata) string {
 	captionEscaped := xmlEscape(caption)
 	var keywordItems strings.Builder
 	for _, kw := range keywords {
@@ -97,11 +98,40 @@ func buildXMP(keywords []string, caption string) string {
 		keywordItems.WriteString("</rdf:li>")
 	}
 
+	geoFields := ""
+	if geo.Valid {
+		cityEscaped := xmlEscape(geo.City)
+		sublocationEscaped := xmlEscape(geo.Sublocation)
+		stateEscaped := xmlEscape(geo.State)
+		countryEscaped := xmlEscape(geo.Country)
+		countryCodeEscaped := xmlEscape(geo.CountryCode)
+		lat := formatXMPGPSCoord(geo.Latitude, true)
+		lon := formatXMPGPSCoord(geo.Longitude, false)
+		altitudeRef := "0"
+		if geo.Altitude < 0 {
+			altitudeRef = "1"
+		}
+		geoFields = fmt.Sprintf(`
+    <Iptc4xmpCore:Location>%s</Iptc4xmpCore:Location>
+    <photoshop:City>%s</photoshop:City>
+    <photoshop:State>%s</photoshop:State>
+    <photoshop:Country>%s</photoshop:Country>
+    <Iptc4xmpCore:CountryCode>%s</Iptc4xmpCore:CountryCode>
+    <exif:GPSLatitude>%s</exif:GPSLatitude>
+    <exif:GPSLongitude>%s</exif:GPSLongitude>
+    <exif:GPSAltitude>%0.2f</exif:GPSAltitude>
+    <exif:GPSAltitudeRef>%s</exif:GPSAltitudeRef>
+`, sublocationEscaped, cityEscaped, stateEscaped, countryEscaped, countryCodeEscaped, lat, lon, geo.Altitude, altitudeRef)
+	}
+
 	return fmt.Sprintf(`<x:xmpmeta xmlns:x="adobe:ns:meta/">
  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
   <rdf:Description rdf:about=""
     xmlns:dc="http://purl.org/dc/elements/1.1/"
-    xmlns:lr="http://ns.adobe.com/lightroom/1.0/">
+    xmlns:lr="http://ns.adobe.com/lightroom/1.0/"
+    xmlns:photoshop="http://ns.adobe.com/photoshop/1.0/"
+    xmlns:exif="http://ns.adobe.com/exif/1.0/"
+    xmlns:Iptc4xmpCore="http://iptc.org/std/Iptc4xmpCore/1.0/xmlns/">
 
     <lr:description>%s</lr:description>
 
@@ -115,12 +145,12 @@ func buildXMP(keywords []string, caption string) string {
       <rdf:Bag>
         %s
       </rdf:Bag>
-    </dc:subject>
+    </dc:subject>%s
 
   </rdf:Description>
  </rdf:RDF>
 </x:xmpmeta>
-`, captionEscaped, captionEscaped, keywordItems.String())
+`, captionEscaped, captionEscaped, keywordItems.String(), geoFields)
 }
 
 func xmlEscape(s string) string {

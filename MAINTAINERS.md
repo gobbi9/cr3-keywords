@@ -4,7 +4,7 @@
 
 ```bash
 git push origin main
-make release-tag VERSION=0.1.0
+make release-tag VERSION=X.Y.Z
 ```
 
 Tagging (`vX.Y.Z`) triggers `.github/workflows/release.yml`, which:
@@ -28,7 +28,7 @@ Tagging (`vX.Y.Z`) triggers `.github/workflows/release.yml`, which:
 
 ```bash
 # from repo root (required)
-uv run scripts/generate_packaging.py --version 0.1.0
+uv run scripts/generate_packaging.py --version X.Y.Z
 ```
 
 Outputs:
