@@ -101,6 +101,9 @@ func (r *Runner) Run(ctx context.Context) error {
 	}
 
 	stepColor.Println("=== Step 2: JPG → TXT ===")
+	if err := lmClient.EnsureServerRunning(ctx); err != nil {
+		return err
+	}
 	if err := batchKeywords(ctx, r.logger, progress, lmClient, jpgDir, outputDir, model, r.opts.PromptPath, selectedJPGs, geoByBase, r.opts.DryRun); err != nil {
 		return err
 	}

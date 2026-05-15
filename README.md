@@ -8,7 +8,7 @@ The main goal of this project is to create keywords and captions from `.cr3` fil
 
 - Built around a Go CLI (`cr3`) for a fast, reproducible workflow.
 - Pipeline is: **CR3 -> JPG -> TXT -> XMP** (keywords + caption + optional geotagging).
-- Progress bar and colored step output are preserved.
+- Progress bar and colored step output are shown.
 - Logging uses Go structured logging (`log/slog`) instead of `println`.
 - Intermediate directories (`jpgs`, `outputs`, `tmp`) are written under the macOS temp folder:
   - `$TEMPDIR/cr3-keywords/jpgs/<folder>`
@@ -19,13 +19,18 @@ The main goal of this project is to create keywords and captions from `.cr3` fil
 
 ## Requirements
 
-- LM Studio running local API server on `http://localhost:1234`
+- LM Studio local API server on `http://localhost:1234`
+- Optional but recommended: LM Studio `lms` CLI available in `PATH`
 
-Start LM Studio server:
+You can start LM Studio server manually:
 
 ```bash
-lms start server
+lms server start
 ```
+
+`cr3` first checks whether `http://localhost:1234` responds with HTTP `200 OK`.
+If not, it tries `lms server start` automatically.
+If `lms` is not available and the server is not already running, startup fails.
 
 `cr3` extracts embedded CR3 JPEG previews using a built-in pure-Go path.
 `exiftool` is optional and used as a fallback if built-in extraction fails for a file.
@@ -102,10 +107,10 @@ Invoke-WebRequest -Uri "https://github.com/gobbi9/cr3-keywords/releases/download
 Model is optional.
 
 If not provided, the CLI auto-detects available models in this order:
-1. LM Studio HTTP API (`GET /v1/models`)
-2. `lms ls --json`
+1. LM Studio native API (`GET /api/v1/models`) using `key` + `capabilities.vision`
+2. `lms ls --json` using `modelKey` + `vision`
 
-Then it picks the best model using a simple vision-priority scoring heuristic.
+Only vision-capable models are considered. Then it picks the best model using a simple vision-priority scoring heuristic.
 
 You can force a specific model with `--model`.
 
@@ -223,8 +228,9 @@ Location field mapping in generated XMP:
 - macOS/Linux
 - [goenv](https://github.com/go-nv/goenv)
 - Go `1.22.5` (see `.go-version`)
-- LM Studio running local API server on `http://localhost:1234`
-- Optional: `exiftool` (fallback when built-in CR3 preview extraction fails, or required when using `--exif`)
+- LM Studio local API server on `http://localhost:1234`
+- Optional but recommended: LM Studio `lms` CLI in `PATH` (used for auto-start and CLI model fallback)
+- Optional: `exiftool` (fallback when built-in CR3 preview extraction fails, or required when using `--exif`, faster than the built-in CR3 preview extraction)
 
 Install tooling:
 

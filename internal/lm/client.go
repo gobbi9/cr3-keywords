@@ -39,12 +39,12 @@ func (c *Client) DetectBestModel(ctx context.Context) (string, error) {
 		return pickBestModel(models), nil
 	}
 
-	models, err = modelsFromLMSCLI(ctx)
+	models, err = modelsFromLmsCli(ctx)
 	if err == nil && len(models) > 0 {
 		return pickBestModel(models), nil
 	}
 
-	return "", errors.New("could not detect loaded LM Studio model via HTTP or lms CLI")
+	return "", errors.New("could not detect vision-capable LM Studio model via HTTP or lms CLI")
 }
 
 // PromptWithImage sends a multimodal chat completion request with prompt text and
@@ -115,7 +115,7 @@ func (c *Client) PromptWithImage(ctx context.Context, model string, prompt strin
 }
 
 func (c *Client) modelsFromHTTP(ctx context.Context) ([]string, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.baseURL+"/v1/models", nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.baseURL+"/api/v1/models", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -131,45 +131,87 @@ func (c *Client) modelsFromHTTP(ctx context.Context) ([]string, error) {
 	}
 
 	var out struct {
-		Data []struct {
-			ID string `json:"id"`
-		} `json:"data"`
+		Models []struct {
+			Key          string `json:"key"`
+			Capabilities *struct {
+				Vision bool `json:"vision"`
+			} `json:"capabilities"`
+		} `json:"models"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {
 		return nil, err
 	}
 
-	models := make([]string, 0, len(out.Data))
-	for _, m := range out.Data {
-		if strings.TrimSpace(m.ID) != "" {
-			models = append(models, m.ID)
+	models := make([]string, 0, len(out.Models))
+	for _, m := range out.Models {
+		if m.Capabilities != nil && m.Capabilities.Vision && strings.TrimSpace(m.Key) != "" {
+			models = append(models, m.Key)
 		}
 	}
 	return models, nil
 }
 
-func modelsFromLMSCLI(ctx context.Context) ([]string, error) {
-	cmd := exec.CommandContext(ctx, "lms", "ls", "--json")
-	out, err := cmd.Output()
+func modelsFromLmsCli(ctx context.Context) ([]string, error) {
+	out, err := runLmsCommand(ctx, "ls", "--json")
 	if err != nil {
 		return nil, err
 	}
 
 	var rows []struct {
-		ID     string `json:"id"`
-		Loaded bool   `json:"loaded"`
+		ModelKey string `json:"modelKey"`
+		Vision   bool   `json:"vision"`
 	}
-	if err := json.Unmarshal(out, &rows); err != nil {
+	if err := json.Unmarshal([]byte(out), &rows); err != nil {
 		return nil, err
 	}
 
-	var models []string
+	models := make([]string, 0, len(rows))
 	for _, r := range rows {
-		if r.Loaded && strings.TrimSpace(r.ID) != "" {
-			models = append(models, r.ID)
+		if r.Vision && strings.TrimSpace(r.ModelKey) != "" {
+			models = append(models, r.ModelKey)
 		}
 	}
 	return models, nil
+}
+
+func (c *Client) EnsureServerRunning(ctx context.Context) error {
+	if c.isServerRespondingOK(ctx) {
+		return nil
+	}
+
+	if _, err := runLmsCommand(ctx, "server", "start"); err != nil {
+		return fmt.Errorf("start lms server: %w", err)
+	}
+
+	if !c.isServerRespondingOK(ctx) {
+		return errors.New("lm studio server is not responding with HTTP 200")
+	}
+
+	return nil
+}
+
+func (c *Client) isServerRespondingOK(ctx context.Context) bool {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.baseURL, nil)
+	if err != nil {
+		return false
+	}
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return false
+	}
+	defer resp.Body.Close()
+
+	return resp.StatusCode == http.StatusOK
+}
+
+func runLmsCommand(ctx context.Context, args ...string) (string, error) {
+	cmd := exec.CommandContext(ctx, "lms", args...)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return "", fmt.Errorf("lms %s failed: %w: %s", strings.Join(args, " "), err, strings.TrimSpace(string(out)))
+	}
+	return string(out), nil
 }
 
 func pickBestModel(models []string) string {
