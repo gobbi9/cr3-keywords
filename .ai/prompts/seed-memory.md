@@ -1,7 +1,9 @@
 
+Apply @.ai/skills/zed-threads/SKILL.md
 Apply @.ai/skills/theory-of-mind/SKILL.md
+Apply @.ai/skills/ai-janitor/SKILL.md
 
-Read the attached historical threads and logs.
+Use `zed-threads` to ingest and process thread records incrementally before updating memory files.
 
 Then update:
 
@@ -9,3 +11,7 @@ Then update:
 - @.ai/active_context.md
 - @.ai/decisions.md
 - @.ai/failures.md
+
+Finally refresh:
+
+- @.ai/README.md

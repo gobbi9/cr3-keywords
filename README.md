@@ -282,3 +282,7 @@ sudo make install
 ```
 
 If you wish to contribute, see [MAINTAINERS.md](MAINTAINERS.md).
+
+## AI Guidelines
+
+- For prompts, skills and project memory, see: [.ai/README.md](.ai/README.md)

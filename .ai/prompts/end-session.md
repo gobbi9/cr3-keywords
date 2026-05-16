@@ -1,5 +1,6 @@
 
 Apply @.ai/skills/memento/SKILL.md
+Apply @.ai/skills/ai-janitor/SKILL.md
 
 Update:
 
@@ -9,3 +10,7 @@ Update:
 - @.ai/failures.md
 
 based on the current session.
+
+Finally refresh:
+
+- @.ai/README.md
