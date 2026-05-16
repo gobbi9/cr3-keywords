@@ -1,12 +1,136 @@
-
 # Decisions
 
-## Template
-
-### YYYY-MM-DD
+### 2026-05-16
 
 Decision:
+- Extend end-session workflow with `tests` and `docs` skills, applied after `ai-janitor`.
 
 Reason:
+- Make session close-out enforce two guardrails:
+  - keep existing unit tests aligned and executed when code changes occur
+  - update root `README.md` only when the session changed files outside `.ai/`
 
 Consequences:
+- End-session behavior now includes test/doc maintenance policy checks.
+- Documentation updates are explicitly gated to non-`.ai` changes, reducing unnecessary README churn.
+
+### 2026-05-16
+
+Decision:
+- Add `.ai` memory workflow with `zed-threads`, `theory-of-mind`, and `ai-janitor` skills.
+
+Reason:
+- Preserve project context across sessions and prevent loss of architectural/history knowledge.
+
+Consequences:
+- Added cursor-managed thread ingestion and recurring maintenance responsibility for `.ai/README.md`.
+
+### 2026-05-14 to 2026-05-15
+
+Decision:
+- Improve LM Studio client robustness (server check strategy, diagnostics/logging behavior).
+
+Reason:
+- Reduce repeated overhead and improve troubleshooting clarity for API/server issues.
+
+Consequences:
+- Better runtime efficiency and clearer debug information during failures.
+
+### 2026-05-14
+
+Decision:
+- Add GPX-aware geotagging and prompt injection of location context.
+
+Reason:
+- Improve caption/keyword quality and write Lightroom-compatible location metadata.
+
+Consequences:
+- Added optional geospatial dependency path (`--gps`) and expanded XMP mapping responsibilities.
+
+### 2026-05-14
+
+Decision:
+- Keep only `--version` flag (remove `version` subcommand style).
+
+Reason:
+- Align with modern CLI conventions and reduce parser branching.
+
+Consequences:
+- Simpler help/usage and reduced command-mode complexity.
+
+### 2026-05-09
+
+Decision:
+- Remove positional argument mode for model/prompt and keep flag-driven interface.
+
+Reason:
+- Positional mode created ambiguity and increased parser complexity.
+
+Consequences:
+- CLI semantics became more explicit and docs became easier to keep accurate.
+
+### 2026-05-07 to 2026-05-08
+
+Decision:
+- Build GitHub release automation and package distribution to Homebrew/Scoop.
+
+Reason:
+- Project was preparing for public/open-source consumption and needed reproducible distribution.
+
+Consequences:
+- Added workflow/pipeline complexity and credential/permissions requirements, but enabled repeatable cross-platform delivery.
+
+### 2026-05-07
+
+Decision:
+- Migrate core pipeline from zsh script into a Go CLI (`cr3`).
+
+Reason:
+- Better maintainability, clearer structure, typed error handling, and easier distribution.
+
+Consequences:
+- New module layout (`cmd`, `internal/*`), explicit option parsing, and standardized logging/progress behavior.
+
+### 2026-05-07
+
+Decision:
+- Add explicit timing/progress UX and introduce cleanup workflow via `--clear`.
+
+Reason:
+- Step 2 (LLM prompting) is the dominant latency source; users needed clear runtime feedback and cleanup controls.
+
+Consequences:
+- Better operator confidence during long runs and easier post-run artifact cleanup.
+
+### 2026-05-07
+
+Decision:
+- Standardize binary naming (`cr3`) and implement version metadata in build/release flow.
+
+Reason:
+- Simpler CLI ergonomics and cleaner release story for end users.
+
+Consequences:
+- Improved install UX, clearer `--version` output, and reduced release confusion.
+
+### 2026-05-07
+
+Decision:
+- Implement pure-Go CR3 preview extraction as default; keep `exiftool` fallback and optional forced mode `--exif`.
+
+Reason:
+- Reduce external dependency burden while retaining performance/reliability fallback.
+
+Consequences:
+- Better out-of-box behavior with optional fast path for users with `exiftool` installed.
+
+### 2026-05-06
+
+Decision:
+- Start from script-first implementation, then progressively formalize into maintainable CLI architecture.
+
+Reason:
+- Needed quick functional progress for CR3 -> JPG -> TXT -> XMP flow before investing in stronger structure.
+
+Consequences:
+- Early velocity was high, followed by iterative refactors to reduce script complexity and edge-case fragility.

@@ -1,6 +1,8 @@
 
 Apply @.ai/skills/memento/SKILL.md
 Apply @.ai/skills/ai-janitor/SKILL.md
+Apply @.ai/skills/tests/SKILL.md
+Apply @.ai/skills/docs/SKILL.md
 
 Update:
 

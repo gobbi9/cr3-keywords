@@ -11,7 +11,7 @@ You ingest Zed thread history from the local `threads.db` and return decoded thr
 
 Use this Nushell pipeline to read one thread at a time:
 
-```/dev/null/zed-threads.nu#L1-12
+```nu
 openn `~/Library/Application Support/Zed/threads/threads.db`
 | get threads
 | where folder_paths =~ 'cr3-keywords'
