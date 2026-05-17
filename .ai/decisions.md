@@ -1,5 +1,19 @@
 # Decisions
 
+### 2026-05-17
+
+Decision:
+- In Development docs, prefer `mise` as the first toolchain manager option and keep `goenv` as an alternative.
+- Document `mise` bootstrap requirements explicitly: `mise settings add idiomatic_version_file_enable_tools go` and `mise install`.
+
+Reason:
+- The project relies on `.go-version`; `mise` needs idiomatic version-file tool support enabled so Go version resolution works as expected.
+- Keep setup guidance modern while preserving compatibility for contributors already using `goenv`.
+
+Consequences:
+- README onboarding for contributors is clearer and less error-prone for `mise` users.
+- Development setup now has two documented, explicit paths (`mise` recommended, `goenv` alternative).
+
 ### 2026-05-16
 
 Decision:

@@ -15,7 +15,7 @@ This file documents prompts, skills, memory artifacts, and state files under `.a
 - `zed-threads/SKILL.md`: ingests Zed `threads.db` incrementally with cursor state.
 - `ai-janitor/SKILL.md`: keeps this README synchronized whenever `.ai` artifacts change.
 - `tests/SKILL.md`: updates and runs existing unit tests without creating new tests.
-- `docs/SKILL.md`: updates the root `README.md` only when session changes include files outside `.ai`.
+- `docs/SKILL.md`: enforces conditional docs maintenance policy (update root README only when non-`.ai` files changed in the session).
 
 ## Other Markdown Files
 

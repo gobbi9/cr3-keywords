@@ -253,7 +253,7 @@ Location field mapping in generated XMP:
 ## Development
 
 - macOS/Linux
-- [goenv](https://github.com/go-nv/goenv)
+- [mise](https://mise.jdx.dev) (recommended) or [goenv](https://github.com/go-nv/goenv)
 - Go `1.22.5` (see `.go-version`)
 - [LM Studio](https://lmstudio.ai) local API server on `http://localhost:1234`
 - Optional but recommended: LM Studio `lms` CLI in `PATH` (used for auto-start and CLI model fallback)
@@ -262,6 +262,13 @@ Location field mapping in generated XMP:
 Install tooling:
 
 ```bash
+# Option A (recommended): mise
+brew install mise
+brew install exiftool # optional (fallback / --exif mode)
+mise settings add idiomatic_version_file_enable_tools go
+mise install
+
+# Option B: goenv
 brew install goenv
 brew install exiftool # optional (fallback / --exif mode)
 goenv install

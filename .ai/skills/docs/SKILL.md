@@ -23,3 +23,5 @@ Update `README.md` if and only if the session changed at least one file outside 
 2. Document externally visible behavior, setup, usage, and workflow impacts.
 3. Avoid documenting internal-only churn that does not affect users.
 4. Keep section ordering and style consistent with existing README conventions.
+5. This skill governs update conditions for `README.md`; it does **not** change dependency relationships in `.ai/README.md` diagrams.
+6. In `.ai/README.md` dependency graphs, keep the conceptual edge `docs/SKILL.md -> ../README.md` stable.

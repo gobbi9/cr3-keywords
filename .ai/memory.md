@@ -46,9 +46,12 @@
 - CLI favors explicit flags over legacy positional argument modes.
 - `--clear` is the cleanup interface (instead of subcommand style).
 - README acts as source-of-truth for operational behavior and user docs.
+- Development docs now prefer [`mise`](https://mise.jdx.dev) first, with `goenv` as an alternative.
+- For `mise`, setup must include `mise settings add idiomatic_version_file_enable_tools go` before `mise install` so `.go-version` is honored idiomatically.
 - End-session `.ai` workflow applies `memento`, `ai-janitor`, `tests`, and `docs` skills in that order.
 - `docs` skill updates root `README.md` only when changes include at least one non-`.ai` file.
 - `tests` skill updates/runs existing unit tests only; it must not create new test files.
+- `failures.md` should contain only real failed attempts; if none occurred in a session, add no failure entry.
 
 ## Current Priorities
 
