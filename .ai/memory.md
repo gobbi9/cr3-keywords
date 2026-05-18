@@ -52,6 +52,7 @@
 - `docs` skill updates root `README.md` only when changes include at least one non-`.ai` file.
 - `tests` skill updates/runs existing unit tests only; it must not create new test files.
 - `failures.md` should contain only real failed attempts; if none occurred in a session, add no failure entry.
+- Mermaid diagrams in Markdown should be GitHub-safe: use simple alphanumeric node IDs (e.g., `endSession` instead of reserved words like `end`), keep display text in brackets, and avoid Mermaid reserved keywords as node identifiers.
 
 ## Current Priorities
 
