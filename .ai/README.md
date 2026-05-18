@@ -64,10 +64,10 @@ graph LR
 
 ```mermaid
 graph LR
-  end["end-session.md"] --> memento["memento/SKILL.md"]
-  end --> janitor["ai-janitor/SKILL.md"]
-  end --> tests["tests/SKILL.md"]
-  end --> docs["docs/SKILL.md"]
+  endSession["end-session.md"] --> memento["memento/SKILL.md"]
+  endSession --> janitor["ai-janitor/SKILL.md"]
+  endSession --> tests["tests/SKILL.md"]
+  endSession --> docs["docs/SKILL.md"]
 
   memento --> memory["memory.md"]
   memento --> active["active_context.md"]
