@@ -36,19 +36,19 @@ openn `~/Library/Application Support/Zed/threads/threads.db`
 
 Persist progress in a cursor file so the user never has to track indices manually.
 
-- Cursor file: `.ai/skills/zed-threads/state/nu.cursor`
+- Cursor file: `.agents/skills/zed-threads/state/nu.cursor`
 - Value stored: integer `i` (0-based)
 
 Workflow:
 
-1. Ensure `.ai/skills/zed-threads/state` exists.
-2. Read `i` from `.ai/skills/zed-threads/state/nu.cursor`.
+1. Ensure `.agents/skills/zed-threads/state` exists.
+2. Read `i` from `.agents/skills/zed-threads/state/nu.cursor`.
    - If missing/invalid, default to `0`.
 3. Execute the pipeline with:
    - `skip i`
    - `first (i + 1)`
 4. Process only the newly included tail thread (the current thread at index `i`) to keep context small.
-5. Increment cursor to `i + 1` and write it back to `.ai/skills/zed-threads/state/nu.cursor`.
+5. Increment cursor to `i + 1` and write it back to `.agents/skills/zed-threads/state/nu.cursor`.
 6. Stop when no new thread is returned.
 
 ## Requirements

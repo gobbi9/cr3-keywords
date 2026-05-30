@@ -6,19 +6,19 @@
 - Documented required `mise` setup commands:
   - `mise settings add idiomatic_version_file_enable_tools go`
   - `mise install`
-- Finalizing end-session memory/decision records and refreshing `.ai/README.md`.
+- Finalizing end-session memory/decision records and refreshing `.agents/README.md`.
 
 ## Open Issues
 
 - No blocking issues identified.
 - `tests` skill: no behavior/code changes this session; test updates/runs were not required.
-- `docs` skill: satisfied (session changed a non-`.ai` file and `README.md` was updated accordingly).
+- `docs` skill: satisfied (session changed a non-`.agents` file and `README.md` was updated accordingly).
 
 ## Next Steps
 
 1. If development tooling changes again, keep both `mise` and `goenv` instructions aligned with actual project version-file behavior.
 2. Continue applying end-session maintenance flow (`memento` -> `ai-janitor` -> `tests` -> `docs`).
-3. Keep `.ai` memory artifacts concise and synchronized with doc/config workflow changes.
+3. Keep `.agents` memory artifacts concise and synchronized with doc/config workflow changes.
 
 ## Recently Changed
 

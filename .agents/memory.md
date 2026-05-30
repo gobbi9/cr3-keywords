@@ -48,8 +48,8 @@
 - README acts as source-of-truth for operational behavior and user docs.
 - Development docs now prefer [`mise`](https://mise.jdx.dev) first, with `goenv` as an alternative.
 - For `mise`, setup must include `mise settings add idiomatic_version_file_enable_tools go` before `mise install` so `.go-version` is honored idiomatically.
-- End-session `.ai` workflow applies `memento`, `ai-janitor`, `tests`, and `docs` skills in that order.
-- `docs` skill updates root `README.md` only when changes include at least one non-`.ai` file.
+- End-session `.agents` workflow applies `memento`, `ai-janitor`, `tests`, and `docs` skills in that order.
+- `docs` skill updates root `README.md` only when changes include at least one non-`.agents` file.
 - `tests` skill updates/runs existing unit tests only; it must not create new test files.
 - `failures.md` should contain only real failed attempts; if none occurred in a session, add no failure entry.
 - Mermaid diagrams in Markdown should be GitHub-safe: use simple alphanumeric node IDs (e.g., `endSession` instead of reserved words like `end`), keep display text in brackets, and avoid Mermaid reserved keywords as node identifiers.
@@ -58,12 +58,12 @@
 
 - Keep release/packaging automation reliable across GitHub Releases + Homebrew + Scoop.
 - Maintain robust LM Studio client behavior and diagnostics.
-- Keep `.ai` memory files synchronized with thread history and recent architectural decisions.
-- Preserve incremental Zed-thread ingestion state in `.ai/skills/zed-threads/state/nu.cursor`.
+- Keep `.agents` memory files synchronized with thread history and recent architectural decisions.
+- Preserve incremental Zed-thread ingestion state in `.agents/skills/zed-threads/state/nu.cursor`.
 - Keep end-session guardrails active for test maintenance and conditional README updates.
 
 ## Historical Thread Digest (seeded)
 
 - Processed Zed thread records incrementally for this project from cursor `0` to `32` (exclusive end cursor now `32`).
 - Recurring themes: CLI ergonomics, release automation, CR3 extraction performance, geotagging/XMP correctness, and documentation polish.
-- Notable evolution arc: zsh script -> Go CLI hardening -> packaging/release system maturity -> `.ai` memory tooling.
+- Notable evolution arc: zsh script -> Go CLI hardening -> packaging/release system maturity -> `.agents` memory tooling.

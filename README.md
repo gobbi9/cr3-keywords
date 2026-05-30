@@ -292,4 +292,4 @@ If you wish to contribute, see [MAINTAINERS.md](MAINTAINERS.md).
 
 ## AI Guidelines
 
-- For prompts, skills and project memory, see: [.ai/README.md](.ai/README.md)
+- For skills and project memory, see: [.agents/README.md](.agents/README.md)

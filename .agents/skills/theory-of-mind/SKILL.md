@@ -21,10 +21,10 @@ You are responsible for extracting:
 
 You update:
 
-- .ai/memory.md
-- .ai/active_context.md
-- .ai/decisions.md
-- .ai/failures.md
+- .agents/memory.md
+- .agents/active_context.md
+- .agents/decisions.md
+- .agents/failures.md
 
 Guidelines:
 

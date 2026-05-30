@@ -22,22 +22,22 @@ Decision:
 Reason:
 - Make session close-out enforce two guardrails:
   - keep existing unit tests aligned and executed when code changes occur
-  - update root `README.md` only when the session changed files outside `.ai/`
+  - update root `README.md` only when the session changed files outside `.agents/`
 
 Consequences:
 - End-session behavior now includes test/doc maintenance policy checks.
-- Documentation updates are explicitly gated to non-`.ai` changes, reducing unnecessary README churn.
+- Documentation updates are explicitly gated to non-`.agents` changes, reducing unnecessary README churn.
 
 ### 2026-05-16
 
 Decision:
-- Add `.ai` memory workflow with `zed-threads`, `theory-of-mind`, and `ai-janitor` skills.
+- Add `.agents` memory workflow with `zed-threads`, `theory-of-mind`, and `ai-janitor` skills.
 
 Reason:
 - Preserve project context across sessions and prevent loss of architectural/history knowledge.
 
 Consequences:
-- Added cursor-managed thread ingestion and recurring maintenance responsibility for `.ai/README.md`.
+- Added cursor-managed thread ingestion and recurring maintenance responsibility for `.agents/README.md`.
 
 ### 2026-05-14 to 2026-05-15
 

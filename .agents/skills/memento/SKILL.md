@@ -10,10 +10,10 @@ You maintain the project's persistent memory files.
 
 You are responsible for updating:
 
-- .ai/memory.md
-- .ai/active_context.md
-- .ai/decisions.md
-- .ai/failures.md
+- .agents/memory.md
+- .agents/active_context.md
+- .agents/decisions.md
+- .agents/failures.md
 
 Responsibilities:
 

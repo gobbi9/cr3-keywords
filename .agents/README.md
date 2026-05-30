@@ -1,21 +1,18 @@
-# .ai Workspace Guide
+# .agents Workspace Guide
 
-This file documents prompts, skills, memory artifacts, and state files under `.ai`.
-
-## Prompts
-
-- `start-session.md`: session bootstrap prompt that loads persistent memory artifacts.
-- `end-session.md`: session close-out prompt that persists new learnings into memory artifacts.
-- `seed-memory.md`: historical seeding prompt that ingests Zed threads and reconstructs long-term memory files.
+This file documents skills, memory artifacts, and state files under `.agents`.
 
 ## Skills
 
+- `start-session/SKILL.md`: session bootstrap skill that loads persistent memory artifacts.
+- `seed-memory/SKILL.md`: historical seeding skill that ingests Zed threads and reconstructs long-term memory files.
+- `end-session/SKILL.md`: session close-out skill that persists new learnings into memory artifacts and refreshes workspace docs.
 - `memento/SKILL.md`: maintains session-to-session memory continuity (`memory.md`, `active_context.md`, `decisions.md`, `failures.md`).
 - `theory-of-mind/SKILL.md`: compresses historical discussions into coherent project memory.
 - `zed-threads/SKILL.md`: ingests Zed `threads.db` incrementally with cursor state.
-- `ai-janitor/SKILL.md`: keeps this README synchronized whenever `.ai` artifacts change.
+- `ai-janitor/SKILL.md`: keeps this README synchronized whenever `.agents` artifacts change.
 - `tests/SKILL.md`: updates and runs existing unit tests without creating new tests.
-- `docs/SKILL.md`: enforces conditional docs maintenance policy (update root README only when non-`.ai` files changed in the session).
+- `docs/SKILL.md`: enforces conditional docs maintenance policy (update root README only when non-`.agents` files changed in the session).
 
 ## Other Markdown Files
 
@@ -23,11 +20,11 @@ This file documents prompts, skills, memory artifacts, and state files under `.a
 - `active_context.md`: current focus, immediate issues, and next actions.
 - `decisions.md`: chronological log of key technical/product decisions.
 - `failures.md`: chronological log of failed approaches and lessons learned.
-- `README.md`: canonical `.ai` workspace index and dependency map.
+- `README.md`: canonical `.agents` workspace index and dependency map.
 
 ## State and Support Files
 
-- `zed-threads/state/nu.cursor`: integer cursor for incremental Zed-thread ingestion progress.
+- `skills/zed-threads/state/nu.cursor`: integer cursor for incremental Zed-thread ingestion progress.
 
 ## Dependency Graph
 
@@ -35,7 +32,7 @@ This file documents prompts, skills, memory artifacts, and state files under `.a
 
 ```mermaid
 graph LR
-  start["start-session.md"] --> memento["memento/SKILL.md"]
+  start["start-session/SKILL.md"] --> memento["memento/SKILL.md"]
   memento --> memory["memory.md"]
   memento --> active["active_context.md"]
   memento --> decisions["decisions.md"]
@@ -46,11 +43,11 @@ graph LR
 
 ```mermaid
 graph LR
-  seed["seed-memory.md"] --> zed["zed-threads/SKILL.md"]
+  seed["seed-memory/SKILL.md"] --> zed["zed-threads/SKILL.md"]
   seed --> tom["theory-of-mind/SKILL.md"]
   seed --> janitor["ai-janitor/SKILL.md"]
 
-  zed --> cursor["zed-threads/state/nu.cursor"]
+  zed --> cursor["skills/zed-threads/state/nu.cursor"]
 
   tom --> memory["memory.md"]
   tom --> active["active_context.md"]
@@ -64,7 +61,7 @@ graph LR
 
 ```mermaid
 graph LR
-  endSession["end-session.md"] --> memento["memento/SKILL.md"]
+  endSession["end-session/SKILL.md"] --> memento["memento/SKILL.md"]
   endSession --> janitor["ai-janitor/SKILL.md"]
   endSession --> tests["tests/SKILL.md"]
   endSession --> docs["docs/SKILL.md"]
