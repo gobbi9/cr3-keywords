@@ -1,5 +1,27 @@
 # Failures and Dead Ends
 
+### 2026-05-31
+
+Attempted:
+- Defined Nushell install/completion signatures as multiple `export extern "cr3" [...]` blocks.
+
+Why it failed:
+- Nushell parser rejects duplicate command definitions within a block (`nu::parser::duplicate_command_def`).
+
+What was learned:
+- Define subcommand externs explicitly (`export extern "cr3 install"`, `export extern "cr3 completion"`) instead of redefining the root command.
+
+### 2026-05-31
+
+Attempted:
+- Parsed Nushell completion context using `split words`.
+
+Why it failed:
+- Path tokens containing separators were fragmented during completion-context parsing, so directory/file suggestions were resolved against wrong paths.
+
+What was learned:
+- Use row-based token splitting for completion context (`split row " "` + filtering) and treat trailing `/` tokens explicitly for directory completion.
+
 ### 2026-05-16
 
 Attempted:

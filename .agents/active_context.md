@@ -2,27 +2,28 @@
 
 ## Current Task
 
-- Session request completed: updated root `README.md` Development tooling docs to add `mise` as the first/recommended option and keep `goenv` as an alternative.
-- Documented required `mise` setup commands:
-  - `mise settings add idiomatic_version_file_enable_tools go`
-  - `mise install`
-- Finalizing end-session memory/decision records and refreshing `.agents/README.md`.
+- Session request completed: shell integration UX was extended and stabilized across `nushell`, `zsh`, and `bash`.
+- Implemented `cr3 completion <target>` and `cr3 install <target>` command flows with explicit required targets.
+- Refactored completion generation/install code into `internal/cli/shell/*` and fixed Nushell-specific completion behavior.
 
 ## Open Issues
 
 - No blocking issues identified.
-- `tests` skill: no behavior/code changes this session; test updates/runs were not required.
-- `docs` skill: satisfied (session changed a non-`.agents` file and `README.md` was updated accordingly).
+- Known follow-up opportunity: Nushell completion parsing still uses space-token splitting; quoted paths containing spaces may need dedicated handling if this becomes a user scenario.
 
 ## Next Steps
 
-1. If development tooling changes again, keep both `mise` and `goenv` instructions aligned with actual project version-file behavior.
-2. Continue applying end-session maintenance flow (`memento` -> `ai-janitor` -> `tests` -> `docs`).
-3. Keep `.agents` memory artifacts concise and synchronized with doc/config workflow changes.
+1. If CLI flags/subcommands change again, update all shell generators (`nushell.go`, `zsh.go`, `bash.go`) in lockstep.
+2. Keep `README.md` usage/install examples aligned with parser behavior and shell completions.
+3. Continue applying end-session flow: `memento` -> `shell-completions` -> `ai-janitor` -> `tests` -> `docs`.
 
 ## Recently Changed
 
-- Updated `README.md` Development section:
-  - Added `mise` link and positioned it as recommended.
-  - Kept `goenv` as alternative.
-  - Added mandatory `mise` setup commands for `.go-version` idiomatic tool handling.
+- Added shell completion command surface:
+  - `cr3 completion nushell|zsh|bash`
+  - `cr3 install nushell|zsh|bash`
+- Removed implicit default for `cr3 install` (target is now required).
+- Fixed Nushell extern duplication error by switching to subcommand externs (`"cr3 install"`, `"cr3 completion"`).
+- Improved Nushell completers:
+  - first positional completion lists directories (excluding dot-directories)
+  - subsequent file completion is scoped to selected CR3 directory and filters `.cr3` case-insensitively.

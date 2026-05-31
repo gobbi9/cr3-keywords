@@ -28,6 +28,14 @@ type Options struct {
 	GPSPath string
 	// GPSProvided tracks whether --gps was explicitly provided by user.
 	GPSProvided bool
+	// Install runs setup helpers for shell integrations.
+	Install bool
+	// InstallTarget selects which integration gets installed (nushell/zsh/bash).
+	InstallTarget string
+	// Completion prints shell completion/module scripts to stdout.
+	Completion bool
+	// CompletionTarget selects which shell script gets printed (nushell/zsh/bash).
+	CompletionTarget string
 
 	// Model is the selected model name. Empty means auto-detect.
 	Model string
@@ -108,6 +116,38 @@ func Parse(args []string) (Options, error) {
 		return opts, nil
 	}
 
+	if len(rest) > 0 && rest[0] == "install" {
+		if len(rest) < 2 {
+			return Options{}, errors.New("install requires a target (supported: nushell|zsh|bash)")
+		}
+		target := rest[1]
+		if len(rest) > 2 {
+			return Options{}, errors.New("install accepts exactly one target (supported: nushell|zsh|bash)")
+		}
+		if !isSupportedShellTarget(target) {
+			return Options{}, fmt.Errorf("unknown install target: %s", target)
+		}
+		opts.Install = true
+		opts.InstallTarget = target
+		return opts, nil
+	}
+
+	if len(rest) > 0 && rest[0] == "completion" {
+		if len(rest) < 2 {
+			return Options{}, errors.New("completion requires a target (supported: nushell|zsh|bash)")
+		}
+		target := rest[1]
+		if len(rest) > 2 {
+			return Options{}, errors.New("completion accepts exactly one target (supported: nushell|zsh|bash)")
+		}
+		if !isSupportedShellTarget(target) {
+			return Options{}, fmt.Errorf("unknown completion target: %s", target)
+		}
+		opts.Completion = true
+		opts.CompletionTarget = target
+		return opts, nil
+	}
+
 	if opts.Clear {
 		if len(rest) > 0 {
 			opts.CR3Path = expandPath(rest[0], home)
@@ -139,7 +179,14 @@ func Usage() string {
   cr3 --clear
   cr3 --clear <cr3_path>
   cr3 --clear <cr3_path> IMG_0150.CR3
+  cr3 install nushell|zsh|bash
+  cr3 completion nushell|zsh|bash
   cr3 --version
+
+Commands:
+  install TARGET      Install shell integration
+  completion TARGET   Print shell completion/module script to stdout
+                      TARGET: nushell|zsh|bash
 
 Flags:
   -v, --verbose       Print detailed per-file logs
@@ -154,6 +201,15 @@ Flags:
       --version       Show version and exit
 
 `
+}
+
+func isSupportedShellTarget(target string) bool {
+	switch target {
+	case "nushell", "zsh", "bash":
+		return true
+	default:
+		return false
+	}
 }
 
 func expandPath(p, home string) string {

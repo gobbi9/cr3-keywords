@@ -11,6 +11,7 @@
 
 - Entry point: `cmd/cr3-keyword/main.go`.
 - CLI parsing and command-mode behavior: `internal/cli/*`.
+- Shell completion generation/install logic: `internal/cli/shell/*`.
 - Pipeline orchestration: `internal/pipeline/runner.go`.
 - Stage 1 preview extraction:
   - Pure-Go CR3 preview extraction is preferred.
@@ -45,10 +46,11 @@
 - Go formatting conventions (`gofmt`/`gopls`) and documentation comments were standardized.
 - CLI favors explicit flags over legacy positional argument modes.
 - `--clear` is the cleanup interface (instead of subcommand style).
+- Shell integration commands are explicit: `cr3 install <nushell|zsh|bash>` and `cr3 completion <nushell|zsh|bash>`.
 - README acts as source-of-truth for operational behavior and user docs.
 - Development docs now prefer [`mise`](https://mise.jdx.dev) first, with `goenv` as an alternative.
 - For `mise`, setup must include `mise settings add idiomatic_version_file_enable_tools go` before `mise install` so `.go-version` is honored idiomatically.
-- End-session `.agents` workflow applies `memento`, `ai-janitor`, `tests`, and `docs` skills in that order.
+- End-session `.agents` workflow applies `memento`, `shell-completions`, `ai-janitor`, `tests`, and `docs` skills in that order.
 - `docs` skill updates root `README.md` only when changes include at least one non-`.agents` file.
 - `tests` skill updates/runs existing unit tests only; it must not create new test files.
 - `failures.md` should contain only real failed attempts; if none occurred in a session, add no failure entry.
@@ -60,7 +62,7 @@
 - Maintain robust LM Studio client behavior and diagnostics.
 - Keep `.agents` memory files synchronized with thread history and recent architectural decisions.
 - Preserve incremental Zed-thread ingestion state in `.agents/skills/zed-threads/state/nu.cursor`.
-- Keep end-session guardrails active for test maintenance and conditional README updates.
+- Keep end-session guardrails active for shell-completion sync, test maintenance, and conditional README updates.
 
 ## Historical Thread Digest (seeded)
 

@@ -100,7 +100,14 @@ cr3 [--verbose] [--dry-run] [--model MODEL] [--prompt ~/.cr3-keywords/prompt.md]
 cr3 --clear
 cr3 --clear <cr3_path>
 cr3 --clear <cr3_path> IMG_0150.CR3
+cr3 install nushell|zsh|bash
+cr3 completion nushell|zsh|bash
 cr3 --version
+
+Commands:
+install TARGET    Install shell integration
+completion TARGET Print shell completion/module script to stdout
+                  TARGET: nushell|zsh|bash
 
 Flags:
 -v, --verbose       Print detailed per-file logs
@@ -154,6 +161,42 @@ cr3 --model qwen2.5-vl --prompt ~/.cr3-keywords/prompt.md --gps <cr3_path> IMG_0
 cr3 --model qwen2.5-vl --prompt ~/.cr3-keywords/prompt.md --gps ~/.cr3-keywords/track.gpx <cr3_path> IMG_0150.CR3
 ```
 
+
+### Shell completion scripts
+
+Print script/module to stdout:
+
+```bash
+cr3 completion nushell
+cr3 completion zsh
+cr3 completion bash
+```
+
+Install to per-user defaults:
+
+```bash
+cr3 install nushell
+cr3 install zsh
+cr3 install bash
+```
+
+Install locations:
+
+- Nushell
+  - macOS: `~/Library/Application Support/nushell/vendor/autoload/cr3.nu`
+  - Linux: `~/.config/nushell/vendor/autoload/cr3.nu` (or `$XDG_CONFIG_HOME/nushell/vendor/autoload/cr3.nu`)
+  - Windows: `%APPDATA%\nushell\vendor\autoload\cr3.nu`
+- Zsh: `$ZDOTDIR/completions/_cr3` (fallback: `~/.zsh/completions/_cr3`)
+- Bash:
+  - Linux/macOS: `$XDG_DATA_HOME/bash-completion/completions/cr3` (fallback: `~/.local/share/bash-completion/completions/cr3`)
+  - Windows: `%LOCALAPPDATA%\bash-completion\completions\cr3`
+
+After install, restart your shell (or source the generated file manually).
+
+Nushell-specific behavior for `cr3` completion:
+
+- first positional argument suggests directories only (dot-directories are excluded)
+- subsequent positional arguments suggest `.cr3` files from the selected first directory (case-insensitive extension matching)
 
 ### Clear generated temporary files and XMP sidecars
 

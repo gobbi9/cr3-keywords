@@ -6,6 +6,7 @@ description: Session close-out skill that persists new learnings into memory art
 # End Session
 
 Apply @.agents/skills/memento/SKILL.md
+Apply @.agents/skills/shell-completions/SKILL.md
 Apply @.agents/skills/ai-janitor/SKILL.md
 Apply @.agents/skills/tests/SKILL.md
 Apply @.agents/skills/docs/SKILL.md

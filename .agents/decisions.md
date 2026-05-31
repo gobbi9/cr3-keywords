@@ -1,5 +1,43 @@
 # Decisions
 
+### 2026-05-31
+
+Decision:
+- Standardize shell integration commands to require explicit targets: `cr3 install <nushell|zsh|bash>` and `cr3 completion <nushell|zsh|bash>`.
+
+Reason:
+- Removes parser ambiguity and keeps command semantics consistent across install/completion flows.
+
+Consequences:
+- Help/docs and all shell completion generators must stay aligned with explicit target requirements.
+- `cr3 install` without a target now returns a user-facing parser error.
+
+### 2026-05-31
+
+Decision:
+- Consolidate shell completion generation/install logic under `internal/cli/shell/*` and keep Nushell extern definitions subcommand-scoped (`"cr3 install"`, `"cr3 completion"`).
+
+Reason:
+- Separate shell-specific responsibilities cleanly and avoid Nushell duplicate-command parse errors caused by multiple `export extern "cr3"` blocks.
+
+Consequences:
+- Main command wiring now calls `shell.Script` / `shell.Install` directly.
+- Completion maintenance has a single, explicit package boundary and skill ownership (`shell-completions`).
+
+### 2026-05-31
+
+Decision:
+- Nushell completion behavior for the main `cr3` flow is context-aware:
+  - first positional argument suggests directories (excluding dot-directories)
+  - subsequent file suggestions are `.cr3` files from the selected first directory, case-insensitive.
+
+Reason:
+- Match expected interactive UX for photo-folder selection and avoid irrelevant file suggestions.
+
+Consequences:
+- Nushell completer functions now parse command context and apply scoped filtering logic.
+- Future quoted-path support may require more robust context tokenization.
+
 ### 2026-05-17
 
 Decision:

@@ -8,6 +8,7 @@ This file documents skills, memory artifacts, and state files under `.agents`.
 - `seed-memory/SKILL.md`: historical seeding skill that ingests Zed threads and reconstructs long-term memory files.
 - `end-session/SKILL.md`: session close-out skill that persists new learnings into memory artifacts and refreshes workspace docs.
 - `memento/SKILL.md`: maintains session-to-session memory continuity (`memory.md`, `active_context.md`, `decisions.md`, `failures.md`).
+- `shell-completions/SKILL.md`: keeps shell completion/module generators and install paths aligned with CLI changes.
 - `theory-of-mind/SKILL.md`: compresses historical discussions into coherent project memory.
 - `zed-threads/SKILL.md`: ingests Zed `threads.db` incrementally with cursor state.
 - `ai-janitor/SKILL.md`: keeps this README synchronized whenever `.agents` artifacts change.
@@ -62,6 +63,7 @@ graph LR
 ```mermaid
 graph LR
   endSession["end-session/SKILL.md"] --> memento["memento/SKILL.md"]
+  endSession --> shellCompletions["shell-completions/SKILL.md"]
   endSession --> janitor["ai-janitor/SKILL.md"]
   endSession --> tests["tests/SKILL.md"]
   endSession --> docs["docs/SKILL.md"]
