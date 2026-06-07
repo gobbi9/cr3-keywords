@@ -48,8 +48,9 @@
 - `--clear` is the cleanup interface (instead of subcommand style).
 - Shell integration commands are explicit: `cr3 install <nushell|zsh|bash>` and `cr3 completion <nushell|zsh|bash>`.
 - README acts as source-of-truth for operational behavior and user docs.
-- Development docs now prefer [`mise`](https://mise.jdx.dev) first, with `goenv` as an alternative.
-- For `mise`, setup must include `mise settings add idiomatic_version_file_enable_tools go` before `mise install` so `.go-version` is honored idiomatically.
+- Development docs prefer [`mise`](https://mise.jdx.dev) first, with `goenv` as an alternative.
+- Editor tooling (`gopls`) depends on the editor process PATH; if `go` is missing from PATH, `go list`-based analysis will fail even when `mise` is configured.
+- Go runtime version is pinned in `.mise.toml` (`[tools] go = "1.22.5"`); contributors using `mise` should run `mise install` in the project.
 - End-session `.agents` workflow applies `memento`, `shell-completions`, `ai-janitor`, `tests`, and `docs` skills in that order.
 - `docs` skill updates root `README.md` only when changes include at least one non-`.agents` file.
 - `tests` skill updates/runs existing unit tests only; it must not create new test files.

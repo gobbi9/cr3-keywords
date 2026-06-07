@@ -297,7 +297,7 @@ Location field mapping in generated XMP:
 
 - macOS/Linux
 - [mise](https://mise.jdx.dev) (recommended) or [goenv](https://github.com/go-nv/goenv)
-- Go `1.22.5` (see `.go-version`)
+- Go `1.22.5` (managed via `.mise.toml`)
 - [LM Studio](https://lmstudio.ai) local API server on `http://localhost:1234`
 - Optional but recommended: LM Studio `lms` CLI in `PATH` (used for auto-start and CLI model fallback)
 - Optional: `exiftool` (fallback when built-in CR3 preview extraction fails, or required when using `--exif`, faster than the built-in CR3 preview extraction)
@@ -308,7 +308,6 @@ Install tooling:
 # Option A (recommended): mise
 brew install mise
 brew install exiftool # optional (fallback / --exif mode)
-mise settings add idiomatic_version_file_enable_tools go
 mise install
 
 # Option B: goenv

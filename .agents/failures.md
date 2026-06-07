@@ -1,5 +1,17 @@
 # Failures and Dead Ends
 
+### 2026-06-07
+
+Attempted:
+- Investigated Zed `gopls` warning (`No active builds contain ... (go list)`) as a potential module/package inclusion issue.
+
+Why it failed:
+- Module/package configuration was valid; the actual failure was environment-level (`go` missing from Zed process PATH), so `go list` could not run.
+
+What was learned:
+- Validate tool availability in the editor runtime first (`go list ./...` vs `mise exec -- go list ./...`) before changing module/workspace files.
+
+
 ### 2026-05-31
 
 Attempted:

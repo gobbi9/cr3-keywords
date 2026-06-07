@@ -12,7 +12,7 @@ This file documents skills, memory artifacts, and state files under `.agents`.
 - `theory-of-mind/SKILL.md`: compresses historical discussions into coherent project memory.
 - `zed-threads/SKILL.md`: ingests Zed `threads.db` incrementally with cursor state.
 - `ai-janitor/SKILL.md`: keeps this README synchronized whenever `.agents` artifacts change.
-- `tests/SKILL.md`: updates and runs existing unit tests without creating new tests.
+- `tests/SKILL.md`: updates and runs existing unit tests when behavior-affecting code changes occur, without creating new tests.
 - `docs/SKILL.md`: enforces conditional docs maintenance policy (update root README only when non-`.agents` files changed in the session).
 
 ## Other Markdown Files

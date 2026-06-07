@@ -2,28 +2,24 @@
 
 ## Current Task
 
-- Session request completed: shell integration UX was extended and stabilized across `nushell`, `zsh`, and `bash`.
-- Implemented `cr3 completion <target>` and `cr3 install <target>` command flows with explicit required targets.
-- Refactored completion generation/install code into `internal/cli/shell/*` and fixed Nushell-specific completion behavior.
+- Completed migration from `.go-version` to `mise` tool definition via `.mise.toml` (`go = "1.22.5"`).
+- Updated root `README.md` development setup to reference `.mise.toml` and removed the now-unneeded `mise settings add idiomatic_version_file_enable_tools go` step.
+- Investigated Zed `gopls` warning (`No active builds contain ... (go list)`) and verified root cause was editor runtime environment (`go` not found on PATH for Zed process), not module/package layout.
 
 ## Open Issues
 
-- No blocking issues identified.
-- Known follow-up opportunity: Nushell completion parsing still uses space-token splitting; quoted paths containing spaces may need dedicated handling if this becomes a user scenario.
+- No repository code blockers.
+- Environment note: GUI-launched Zed may still need PATH initialization aligned with `mise` (or fallback Go on PATH) so `gopls` can run `go list` reliably.
 
 ## Next Steps
 
-1. If CLI flags/subcommands change again, update all shell generators (`nushell.go`, `zsh.go`, `bash.go`) in lockstep.
-2. Keep `README.md` usage/install examples aligned with parser behavior and shell completions.
+1. If `gopls` warnings recur, launch Zed from a shell initialized with `mise` or ensure GUI app PATH includes Go.
+2. Keep runtime docs aligned with actual project runtime source of truth (`.mise.toml`).
 3. Continue applying end-session flow: `memento` -> `shell-completions` -> `ai-janitor` -> `tests` -> `docs`.
 
 ## Recently Changed
 
-- Added shell completion command surface:
-  - `cr3 completion nushell|zsh|bash`
-  - `cr3 install nushell|zsh|bash`
-- Removed implicit default for `cr3 install` (target is now required).
-- Fixed Nushell extern duplication error by switching to subcommand externs (`"cr3 install"`, `"cr3 completion"`).
-- Improved Nushell completers:
-  - first positional completion lists directories (excluding dot-directories)
-  - subsequent file completion is scoped to selected CR3 directory and filters `.cr3` case-insensitively.
+- Added `.mise.toml` with Go tool version pin.
+- Removed `.go-version`.
+- Updated development docs in `README.md` to match the new `mise` workflow.
+- Confirmed `mise exec -- go list ./...` includes `internal/cli` while plain `go list ./...` fails when `go` is missing from PATH.

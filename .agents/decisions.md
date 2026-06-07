@@ -1,5 +1,20 @@
 # Decisions
 
+### 2026-06-07
+
+Decision:
+- Replace `.go-version` with project-local `mise` configuration in `.mise.toml` (`[tools] go = "1.22.5"`).
+- Simplify development docs to `mise install` without `idiomatic_version_file_enable_tools` setup.
+
+Reason:
+- The project now defines runtime versions directly in `mise` native config, so idiomatic-version-file bridging is unnecessary.
+- Reduces setup friction and keeps runtime source-of-truth in one place.
+
+Consequences:
+- Contributors should rely on `.mise.toml` for Go version selection.
+- `gopls` issues like `No active builds contain ... (go list)` should be debugged as editor PATH/runtime environment problems when module layout is otherwise valid.
+
+
 ### 2026-05-31
 
 Decision:
