@@ -195,7 +195,8 @@ After install, restart your shell (or source the generated file manually).
 
 Nushell-specific behavior for `cr3` completion:
 
-- first positional argument suggests directories only (dot-directories are excluded)
+- when completing `cr3 ` (with trailing space), the first entries are curated command examples with descriptions
+- first positional argument suggestions remain directory-only (dot-directories are excluded)
 - subsequent positional arguments suggest `.cr3` files from the selected first directory (case-insensitive extension matching)
 
 ### Clear generated temporary files and XMP sidecars

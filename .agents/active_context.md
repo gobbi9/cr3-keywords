@@ -2,24 +2,28 @@
 
 ## Current Task
 
-- Completed migration from `.go-version` to `mise` tool definition via `.mise.toml` (`go = "1.22.5"`).
-- Updated root `README.md` development setup to reference `.mise.toml` and removed the now-unneeded `mise settings add idiomatic_version_file_enable_tools go` step.
-- Investigated Zed `gopls` warning (`No active builds contain ... (go list)`) and verified root cause was editor runtime environment (`go` not found on PATH for Zed process), not module/package layout.
+- Added Nushell-only top-of-list examples for `cr3 <TAB>` in `internal/cli/shell/nushell.go` using record completions (`value` + `description`).
+- Updated those examples to five requested workflows:
+  1. recommended `--gps` + `--exif`
+  2. same flow with `--edit-prompt`
+  3. full control run with `--gps --exif --edit-prompt --model --prompt`
+  4. test mode with `--verbose --dry-run`
+  5. cleanup flow with `--clear`
+- Preserved existing Nushell completion behavior after the examples (directory-first, then `.cr3` suggestions from selected directory).
+- Updated root `README.md` completion section to document the new Nushell example-first behavior.
 
 ## Open Issues
 
-- No repository code blockers.
-- Environment note: GUI-launched Zed may still need PATH initialization aligned with `mise` (or fallback Go on PATH) so `gopls` can run `go list` reliably.
+- No active blockers identified.
 
 ## Next Steps
 
-1. If `gopls` warnings recur, launch Zed from a shell initialized with `mise` or ensure GUI app PATH includes Go.
-2. Keep runtime docs aligned with actual project runtime source of truth (`.mise.toml`).
+1. If desired, tune example paths/model names in Nushell examples to user-specific defaults.
+2. Keep shell completion docs aligned with future UX tweaks.
 3. Continue applying end-session flow: `memento` -> `shell-completions` -> `ai-janitor` -> `tests` -> `docs`.
 
 ## Recently Changed
 
-- Added `.mise.toml` with Go tool version pin.
-- Removed `.go-version`.
-- Updated development docs in `README.md` to match the new `mise` workflow.
-- Confirmed `mise exec -- go list ./...` includes `internal/cli` while plain `go list ./...` fails when `go` is missing from PATH.
+- `internal/cli/shell/nushell.go`: added curated example completions and merged with existing directory completions for `cr3 ` context.
+- `README.md`: documented Nushell curated examples before standard positional suggestions.
+- Validation: `mise exec -- go test ./...` passed.

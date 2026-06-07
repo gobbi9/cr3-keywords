@@ -3,6 +3,18 @@
 ### 2026-06-07
 
 Decision:
+- For Nushell only, prepend `cr3 <TAB>` completions with curated workflow examples that include descriptions, while preserving existing directory and `.cr3` completion behavior after those examples.
+
+Reason:
+- Improves discoverability of common command patterns directly in interactive completion without changing parser semantics or other shells.
+
+Consequences:
+- `internal/cli/shell/nushell.go` now includes an examples completer that returns structured completion records (`value`, `description`) merged ahead of directory suggestions in root command context.
+- README completion docs include the Nushell example-first behavior.
+
+### 2026-06-07
+
+Decision:
 - Replace `.go-version` with project-local `mise` configuration in `.mise.toml` (`[tools] go = "1.22.5"`).
 - Simplify development docs to `mise install` without `idiomatic_version_file_enable_tools` setup.
 

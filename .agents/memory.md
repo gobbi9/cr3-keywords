@@ -47,6 +47,7 @@
 - CLI favors explicit flags over legacy positional argument modes.
 - `--clear` is the cleanup interface (instead of subcommand style).
 - Shell integration commands are explicit: `cr3 install <nushell|zsh|bash>` and `cr3 completion <nushell|zsh|bash>`.
+- Nushell root completion (`cr3 <TAB>`) surfaces curated example commands with descriptions before standard directory/file suggestions.
 - README acts as source-of-truth for operational behavior and user docs.
 - Development docs prefer [`mise`](https://mise.jdx.dev) first, with `goenv` as an alternative.
 - Editor tooling (`gopls`) depends on the editor process PATH; if `go` is missing from PATH, `go list`-based analysis will fail even when `mise` is configured.
@@ -64,6 +65,7 @@
 - Keep `.agents` memory files synchronized with thread history and recent architectural decisions.
 - Preserve incremental Zed-thread ingestion state in `.agents/skills/zed-threads/state/nu.cursor`.
 - Keep end-session guardrails active for shell-completion sync, test maintenance, and conditional README updates.
+- Preserve Nushell completion UX where curated top-of-list examples do not change downstream directory/CR3 completion behavior.
 
 ## Historical Thread Digest (seeded)
 
