@@ -43,7 +43,7 @@ Why it failed:
 - Historical processing became easy to duplicate or skip without reliable progress tracking.
 
 What was learned:
-- Cursor-based incremental ingestion (`.agents/skills/zed-threads/state/nu.cursor`) is required for safe, repeatable memory seeding.
+- Durable progress tracking is required for safe, repeatable historical-memory seeding.
 
 ### 2026-05-14 to 2026-05-15
 

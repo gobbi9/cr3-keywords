@@ -96,13 +96,13 @@ Consequences:
 ### 2026-05-16
 
 Decision:
-- Add `.agents` memory workflow with `zed-threads`, `theory-of-mind`, and `ai-janitor` skills.
+- Add `.agents` memory workflow with `theory-of-mind` and `ai-janitor` skills.
 
 Reason:
 - Preserve project context across sessions and prevent loss of architectural/history knowledge.
 
 Consequences:
-- Added cursor-managed thread ingestion and recurring maintenance responsibility for `.agents/README.md`.
+- Added recurring maintenance responsibility for `.agents/README.md` and long-term memory summaries.
 
 ### 2026-05-14 to 2026-05-15
 
