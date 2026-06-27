@@ -3,7 +3,11 @@ BIN_DIR := bin
 CMD := ./cmd/cr3-keyword
 OUT := $(BIN_DIR)/$(APP)
 
+LOCAL_MAN_ROOT := .man
+LOCAL_MAN_DIR := $(LOCAL_MAN_ROOT)/man1
+
 INSTALL_PATH ?= /usr/local/bin
+MAN_DIR ?= /usr/local/share/man/man1
 
 GIT_HASH := $(shell git rev-parse --short HEAD 2>/dev/null || echo unknown)
 BUILD_TIME := $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
@@ -15,13 +19,13 @@ CGO_ENABLED ?= 0
 help:
 	@echo "Targets:"
 	@echo "  make tidy                         - run go mod tidy"
-	@echo "  make build [VERSION=x.y.z]        - build $(OUT) (override OUT/GOOS/GOARCH/CGO_ENABLED as needed)"
+	@echo "  make build [VERSION=x.y.z]        - build $(OUT) and stage local man page at $(LOCAL_MAN_DIR)/$(APP).1"
 	@echo "  make rebuild [VERSION=x.y.z]      - clean + build"
 	@echo "  make run ARGS='...'               - run with ARGS"
-	@echo "  make install [VERSION=x.y.z]      - install $(APP) to $(INSTALL_PATH)"
-	@echo "  make uninstall                    - remove $(INSTALL_PATH)/$(APP)"
+	@echo "  make install [VERSION=x.y.z]      - install $(APP) and man page"
+	@echo "  make uninstall                    - remove $(INSTALL_PATH)/$(APP) and man page"
 	@echo "  make release-tag VERSION=x.y.z    - create and push tag vX.Y.Z from current commit"
-	@echo "  make clean                        - remove built binaries"
+	@echo "  make clean                        - remove built binaries and local staged man page"
 
 tidy:
 	go mod tidy
@@ -29,6 +33,8 @@ tidy:
 build:
 	mkdir -p $(dir $(OUT))
 	CGO_ENABLED=$(CGO_ENABLED) GOOS=$(GOOS) GOARCH=$(GOARCH) go build -ldflags "-X main.version=$(VERSION) -X main.buildTime=$(BUILD_TIME)" -o $(OUT) $(CMD)
+	install -d $(LOCAL_MAN_DIR)
+	install -m 0644 docs/man/$(APP).1 $(LOCAL_MAN_DIR)/$(APP).1
 
 rebuild: clean build
 
@@ -37,9 +43,12 @@ run: build
 
 install: build
 	install -m 0755 $(OUT) $(INSTALL_PATH)/$(APP)
+	install -d $(MAN_DIR)
+	install -m 0644 docs/man/$(APP).1 $(MAN_DIR)/$(APP).1
 
 uninstall:
 	rm -f $(INSTALL_PATH)/$(APP)
+	rm -f $(MAN_DIR)/$(APP).1
 
 release-tag:
 	@if [ -z "$(VERSION)" ] || [ "$(VERSION)" = "dev" ]; then \
@@ -56,3 +65,4 @@ release-tag:
 
 clean:
 	rm -rf $(BIN_DIR)
+	rm -rf $(LOCAL_MAN_ROOT)

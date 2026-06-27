@@ -44,6 +44,7 @@ def main() -> int:
         "SHA256_DARWIN_AMD64": dist_dir / f"cr3_{version}_darwin-amd64",
         "SHA256_LINUX_AMD64": dist_dir / f"cr3_{version}_linux-amd64",
         "SHA256_WINDOWS_AMD64": dist_dir / f"cr3_{version}_windows-amd64.exe",
+        "SHA256_MANPAGE": dist_dir / "cr3.1",
     }
 
     missing = [str(path) for path in artifacts.values() if not path.is_file()]

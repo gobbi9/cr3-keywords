@@ -172,34 +172,78 @@ func Parse(args []string) (Options, error) {
 
 // Usage returns the CLI help text.
 func Usage() string {
-	return `Usage:
-  cr3 [--verbose] [--dry-run] [--model MODEL] [--prompt ~/.cr3-keywords/prompt.md] [--edit-prompt] [--gps [~/.cr3-keywords/track.gpx]] [--exif] <cr3_path>
-  cr3 [--verbose] [--dry-run] [--model MODEL] [--prompt ~/.cr3-keywords/prompt.md] [--edit-prompt] [--gps [~/.cr3-keywords/track.gpx]] [--exif] <cr3_path> IMG_0150.CR3
-  cr3 [--verbose] [--dry-run] [--model MODEL] [--prompt ~/.cr3-keywords/prompt.md] [--edit-prompt] [--gps [~/.cr3-keywords/track.gpx]] [--exif] <cr3_path> IMG_0150.CR3 IMG_0151.CR3
-  cr3 --clear
-  cr3 --clear <cr3_path>
-  cr3 --clear <cr3_path> IMG_0150.CR3
-  cr3 install nushell|zsh|bash
-  cr3 completion nushell|zsh|bash
+	return `NAME
+  cr3 - local Lightroom AI keywording and captioning pipeline for Canon CR3 photos
+
+SYNOPSIS
+  cr3 [OPTIONS] <cr3_path> [CR3_FILE ...]
+  cr3 --clear [<cr3_path> [CR3_FILE ...]]
+  cr3 install <nushell|zsh|bash>
+  cr3 completion <nushell|zsh|bash>
   cr3 --version
 
-Commands:
-  install TARGET      Install shell integration
-  completion TARGET   Print shell completion/module script to stdout
-                      TARGET: nushell|zsh|bash
+DESCRIPTION
+  cr3 processes .CR3 photos locally using LM Studio and writes XMP sidecar metadata.
+  Pipeline: CR3 -> JPG preview -> TXT (keywords/caption) -> XMP sidecar.
 
-Flags:
-  -v, --verbose       Print detailed per-file logs
-  -n, --dry-run       Simulate actions without writing files or sending requests
-  -m, --model         Optional model name (if omitted, auto-detected)
-  -p, --prompt        Prompt file path (default: ~/.cr3-keywords/prompt.md)
-  -e, --edit-prompt   Open prompt file in terminal editor before running
-      --gps [PATH]    Enable GPX geotagging. Optional path (default: ~/.cr3-keywords/track.gpx)
-      --exif          Force exiftool for CR3 preview extraction (faster, requires exiftool)
-      --clear         Delete generated .jpg/.txt and sidecar .xmp for matching CR3 files
-  -h, --help          Show this help
-      --version       Show version and exit
+COMMANDS
+  install TARGET
+      Install shell integration for TARGET.
 
+  completion TARGET
+      Print shell completion/module script to stdout for TARGET.
+
+OPTIONS
+  -v, --verbose
+      Print detailed per-file logs.
+
+  -n, --dry-run
+      Simulate actions without writing files or sending requests.
+
+  -m, --model MODEL
+      Optional model name (default: auto-detect).
+
+  -p, --prompt PATH
+      Prompt file path (default: ~/.cr3-keywords/prompt.md).
+
+  -e, --edit-prompt
+      Open prompt file in terminal editor before running.
+
+      --gps [PATH]
+      Enable GPX geotagging. Optional path (default: ~/.cr3-keywords/track.gpx).
+
+      --exif
+      Force exiftool for CR3 preview extraction (faster, requires exiftool).
+
+      --clear
+      Delete generated .jpg/.txt and sidecar .xmp for matching CR3 files.
+
+  -h, --help
+      Show this help.
+
+      --version
+      Show version and exit.
+
+EXAMPLES
+  cr3 ~/Pictures/Canon
+  cr3 ~/Pictures/Canon IMG_0150.CR3 IMG_0151.CR3
+  cr3 --model qwen2.5-vl --prompt ~/.cr3-keywords/prompt.md --gps ~/track.gpx ~/Pictures/Canon IMG_0150.CR3
+  cr3 --clear
+  cr3 install nushell
+  cr3 completion zsh
+
+FILES
+  ~/.cr3-keywords/prompt.md
+      Default prompt file.
+
+  ~/.cr3-keywords/track.gpx
+      Default GPX track file used when --gps is provided without a path.
+
+  ~/.cr3-keywords/last-run-cr3-path.txt
+      Last successful CR3 path used by --clear when no path is provided.
+
+SEE ALSO
+  man cr3
 `
 }
 

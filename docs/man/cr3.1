@@ -1,0 +1,101 @@
+.TH CR3 1 "2026-06-27" "cr3-keywords" "User Commands"
+.SH NAME
+cr3 \- local Lightroom AI keywording and captioning pipeline for Canon CR3 photos
+.SH SYNOPSIS
+.B cr3
+.RI [ OPTIONS ] " <cr3_path> [CR3_FILE ...]"
+.br
+.B cr3
+.BR --clear " [<cr3_path> [CR3_FILE ...]]"
+.br
+.B cr3
+.B install
+.RI " <nushell|zsh|bash>"
+.br
+.B cr3
+.B completion
+.RI " <nushell|zsh|bash>"
+.br
+.B cr3
+.B --version
+.SH DESCRIPTION
+.B cr3
+processes .CR3 photos locally using LM Studio and writes XMP sidecar metadata.
+The pipeline is: CR3 \-> JPG preview \-> TXT (keywords/caption) \-> XMP sidecar.
+.SH COMMANDS
+.TP
+.BI install " TARGET"
+Install shell integration for TARGET.
+.TP
+.BI completion " TARGET"
+Print shell completion/module script to stdout for TARGET.
+.SH OPTIONS
+.TP
+.BR -v , " --verbose"
+Print detailed per-file logs.
+.TP
+.BR -n , " --dry-run"
+Simulate actions without writing files or sending requests.
+.TP
+.BR -m , " --model " "MODEL"
+Optional model name (default: auto-detect).
+.TP
+.BR -p , " --prompt " "PATH"
+Prompt file path (default: ~/.cr3-keywords/prompt.md).
+.TP
+.BR -e , " --edit-prompt"
+Open prompt file in terminal editor before running.
+.TP
+.BR --gps " [PATH]"
+Enable GPX geotagging. Optional path (default: ~/.cr3-keywords/track.gpx).
+.TP
+.BR --exif
+Force exiftool for CR3 preview extraction (faster, requires exiftool).
+.TP
+.BR --clear
+Delete generated .jpg/.txt and sidecar .xmp for matching CR3 files.
+.TP
+.BR -h , " --help"
+Show help.
+.TP
+.BR --version
+Show version and exit.
+.SH EXAMPLES
+.nf
+cr3 ~/Pictures/Canon
+cr3 ~/Pictures/Canon IMG_0150.CR3 IMG_0151.CR3
+cr3 --model qwen2.5-vl --prompt ~/.cr3-keywords/prompt.md --gps ~/track.gpx ~/Pictures/Canon IMG_0150.CR3
+cr3 --clear
+cr3 install nushell
+cr3 completion zsh
+.fi
+.SH FILES
+.TP
+.I ~/.cr3-keywords/prompt.md
+Default prompt file.
+.TP
+.I ~/.cr3-keywords/track.gpx
+Default GPX track file used when --gps is provided without a path.
+.TP
+.I ~/.cr3-keywords/last-run-cr3-path.txt
+Last successful CR3 path used by --clear when no path is provided.
+.SH EXIT STATUS
+Returns 0 on success and non-zero on error.
+.SH RELATED COMMANDS
+.TP
+.B lms ls --json
+Used for model discovery fallback when HTTP model discovery is unavailable. The CLI parses this JSON output and selects a vision-capable model key.
+.TP
+.B lms server start
+Used to start LM Studio when the local server at http://localhost:1234 is not responding.
+.TP
+.B exiftool -b -PreviewImage FILE.CR3
+Used to extract the embedded JPEG preview stream from CR3 files when fallback/forced exiftool extraction is active.
+.TP
+.B exiftool -Orientation -n -s -s -s FILE.CR3
+Used to read numeric orientation for rotation correction during JPG generation.
+.TP
+.B exiftool -j -DateTimeOriginal -SubSecDateTimeOriginal -CreateDate FILE.CR3
+Used as capture-time fallback for GPX geotagging when native metadata parsing cannot read timestamps.
+.SH SEE ALSO
+.BR exiftool (1)

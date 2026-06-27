@@ -1,5 +1,28 @@
 # Failures and Dead Ends
 
+### 2026-06-27
+
+Attempted:
+- Adding MANPATH-aware local-man fallback inside Nushell custom `help cr3` to prefer repo-local `.man` pages.
+
+Why it failed:
+- Nushell command definitions (`export extern "cr3"`) hijack `cr3 --help` semantics, and `help cr3` in the module context still does not provide a clean, reliable equivalent to external `man cr3` behavior for this workflow.
+
+What was learned:
+- Keep local man-page verification explicit and separate (e.g., dedicated `man cr3` helper or direct external command invocation) rather than coupling it to Nushell's `help` integration for the same command name.
+
+### 2026-06-27
+
+Attempted:
+- Runtime validation by executing freshly built local `cr3` binaries (`go run` and `go build -o bin/cr3` outputs).
+
+Why it failed:
+- In the current agent environment, macOS loader aborted with `missing LC_UUID load command` when launching newly built binaries.
+
+What was learned:
+- Prefer compile-time validation (`go test`, `go build`) plus template-level/shell sourcing checks when runtime execution is blocked by host toolchain/runtime constraints.
+
+
 ### 2026-06-07
 
 Attempted:

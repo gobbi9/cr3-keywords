@@ -22,8 +22,19 @@ class Cr3Keywords < Formula
     end
   end
 
+  depends_on "exiftool"
+
+  resource "manpage" do
+    url "https://github.com/gobbi9/cr3-keywords/releases/download/v{{VERSION}}/cr3.1"
+    sha256 "{{SHA256_MANPAGE}}"
+  end
+
   def install
     bin.install Dir["cr3_{{VERSION}}_*"] .first => "cr3"
+
+    resource("manpage").stage do
+      man1.install "cr3.1"
+    end
   end
 
   test do

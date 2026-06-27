@@ -83,6 +83,11 @@ jobs:
       - name: Set up uv
         uses: astral-sh/setup-uv@v5
 
+      - name: Add man page to release assets
+        run: |
+          set -euo pipefail
+          cp docs/man/cr3.1 dist/cr3.1
+
       - name: Publish release assets
         uses: softprops/action-gh-release@v2
         with:

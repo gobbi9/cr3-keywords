@@ -44,12 +44,16 @@ brew tap gobbi9/tap https://github.com/gobbi9/tap
 brew install cr3-keywords
 ```
 
+Homebrew formula links `exiftool` so `--exif` works out of the box.
+
 ### Scoop (Windows)
 
 ```bash
 scoop bucket add gobbi9 https://github.com/gobbi9/scoop-bucket
 scoop install gobbi9/cr3-keywords
 ```
+
+Scoop manifest suggests `extras/exiftool` as an optional companion for `--exif`.
 
 ## Install prebuilt binaries (GitHub Releases)
 
@@ -63,6 +67,7 @@ Assets are published as:
 - `cr3_<version>_darwin-amd64` (macOS Intel)
 - `cr3_<version>_linux-amd64` (Linux x86_64)
 - `cr3_<version>_windows-amd64.exe` (Windows x86_64)
+- `cr3.1` (Unix man page)
 
 Quick install examples:
 
@@ -93,33 +98,35 @@ Invoke-WebRequest -Uri "https://github.com/gobbi9/cr3-keywords/releases/download
 
 ### Flags
 
-```bash
-cr3 [--verbose] [--dry-run] [--model MODEL] [--prompt ~/.cr3-keywords/prompt.md] [--edit-prompt] [--gps [~/.cr3-keywords/track.gpx]] [--exif] <cr3_path>
-cr3 [--verbose] [--dry-run] [--model MODEL] [--prompt ~/.cr3-keywords/prompt.md] [--edit-prompt] [--gps [~/.cr3-keywords/track.gpx]] [--exif] <cr3_path> IMG_0150.CR3
-cr3 [--verbose] [--dry-run] [--model MODEL] [--prompt ~/.cr3-keywords/prompt.md] [--edit-prompt] [--gps [~/.cr3-keywords/track.gpx]] [--exif] <cr3_path> IMG_0150.CR3 IMG_0151.CR3
-cr3 --clear
-cr3 --clear <cr3_path>
-cr3 --clear <cr3_path> IMG_0150.CR3
-cr3 install nushell|zsh|bash
-cr3 completion nushell|zsh|bash
-cr3 --version
+```text
+NAME
+  cr3 - local Lightroom AI keywording and captioning pipeline for Canon CR3 photos
 
-Commands:
-install TARGET    Install shell integration
-completion TARGET Print shell completion/module script to stdout
-                  TARGET: nushell|zsh|bash
+SYNOPSIS
+  cr3 [OPTIONS] <cr3_path> [CR3_FILE ...]
+  cr3 --clear [<cr3_path> [CR3_FILE ...]]
+  cr3 install <nushell|zsh|bash>
+  cr3 completion <nushell|zsh|bash>
+  cr3 --version
 
-Flags:
--v, --verbose       Print detailed per-file logs
--n, --dry-run       Simulate actions without writing files or sending requests
--m, --model         Optional model name (if omitted, auto-detected)
--p, --prompt        Prompt file path (default: ~/.cr3-keywords/prompt.md)
--e, --edit-prompt   Open prompt file in terminal editor before running
-    --gps [PATH]    Enable GPX geotagging. Optional path (default: ~/.cr3-keywords/track.gpx)
-    --exif          Force exiftool for CR3 preview extraction (faster, requires exiftool)
-    --clear         Delete generated .jpg/.txt and sidecar .xmp for matching CR3 files
--h, --help          Show this help
-    --version       Show version and exit
+COMMANDS
+  install TARGET
+      Install shell integration for TARGET.
+
+  completion TARGET
+      Print shell completion/module script to stdout for TARGET.
+
+OPTIONS
+  -v, --verbose           Print detailed per-file logs
+  -n, --dry-run           Simulate actions without writing files or sending requests
+  -m, --model MODEL       Optional model name (default: auto-detect)
+  -p, --prompt PATH       Prompt file path (default: ~/.cr3-keywords/prompt.md)
+  -e, --edit-prompt       Open prompt file in terminal editor before running
+      --gps [PATH]        Enable GPX geotagging (default path: ~/.cr3-keywords/track.gpx)
+      --exif              Force exiftool for CR3 preview extraction
+      --clear             Delete generated .jpg/.txt and sidecar .xmp for matching CR3 files
+  -h, --help              Show this help
+      --version           Show version and exit
 ```
 
 `--gps` enables GPX geotagging.
@@ -193,11 +200,27 @@ Install locations:
 
 After install, restart your shell (or source the generated file manually).
 
+Nushell module note:
+
+- the generated module exports a custom `help cr3` command that tries `man cr3` first and falls back to `cr3 --help`, so Nushell help stays close to the manual page.
+
 Nushell-specific behavior for `cr3` completion:
 
 - when completing `cr3 ` (with trailing space), the first entries are curated command examples with descriptions
 - first positional argument suggestions remain directory-only (dot-directories are excluded)
 - subsequent positional arguments suggest `.cr3` files from the selected first directory (case-insensitive extension matching)
+
+### Manual page (`man cr3`)
+
+If your install path includes man pages (for example Homebrew formula install or `make install`), you can use:
+
+```bash
+man cr3
+```
+
+The man page source in this repo is:
+
+- `docs/man/cr3.1`
 
 ### Clear generated temporary files and XMP sidecars
 

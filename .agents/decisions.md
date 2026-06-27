@@ -1,5 +1,77 @@
 # Decisions
 
+### 2026-06-27
+
+Decision:
+- Keep man-page source in `docs/man/cr3.1` and stage a separate repo-local manpath (`.man/man1`) during `make build` for verification, rather than writing build output back into docs source paths.
+
+Reason:
+- Preserves clean separation between authored docs and build artifacts while enabling local `man` checks without system-wide install.
+
+Consequences:
+- `overlay.nu` provides explicit local-man helper behavior and `.man/` is ignored in git.
+
+### 2026-06-27
+
+Decision:
+- Add `{{config_root}}/bin` to project `.mise.toml` PATH injection and remove explicit `cr3` alias from repo overlay.
+
+Reason:
+- Simplifies overlay maintenance and keeps binary discovery consistent for repo-local tooling.
+
+Consequences:
+- `cr3` resolves from repo `bin/` when using `mise` in the project.
+
+### 2026-06-27
+
+Decision:
+- Track external tool commands in man-page `RELATED COMMANDS`; include only tools with real manpages in `SEE ALSO`.
+
+Reason:
+- Keeps CLI operational dependencies discoverable while preserving standard manpage semantics.
+
+Consequences:
+- `lms` and concrete `exiftool` command invocations are documented under `RELATED COMMANDS`; `SEE ALSO` remains strict (`exiftool(1)`).
+
+
+### 2026-06-27
+
+Decision:
+- Consolidate shell-completion ownership into `docs` skill and remove the dedicated `shell-completions` skill.
+
+Reason:
+- Completion/help/man documentation and user-facing command docs must stay aligned, and a single docs-oriented skill reduces coordination overhead.
+
+Consequences:
+- End-session skill chain now omits `shell-completions`.
+- `.agents` docs and workflow references must point to `docs/SKILL.md` for completion/man guidance.
+
+### 2026-06-27
+
+Decision:
+- Externalize shell completion script bodies into template files (`*.tmpl`) rendered by embedded Go templates.
+
+Reason:
+- Improves readability and maintainability of shell script content without changing completion install/routing semantics.
+
+Consequences:
+- `internal/cli/shell/{bash,zsh,nushell}.go` now delegate rendering.
+- New shared renderer in `internal/cli/shell/templates.go` and template assets are embedded in the binary.
+
+### 2026-06-27
+
+Decision:
+- Introduce man-page distribution (`docs/man/cr3.1`) and include it in release + Homebrew packaging; treat Scoop as non-man-page platform and provide `--help` guidance there.
+
+Reason:
+- Align CLI UX with Unix expectations (`man cr3`) while keeping Windows packaging pragmatic.
+
+Consequences:
+- Release workflow now ships `cr3.1` asset.
+- Packaging manifest generation includes `SHA256_MANPAGE`.
+- Homebrew formula installs man page and links `exiftool`; Scoop suggests `exiftool` and documents `cr3 --help`.
+
+
 ### 2026-06-07
 
 Decision:

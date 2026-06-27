@@ -47,13 +47,14 @@
 - CLI favors explicit flags over legacy positional argument modes.
 - `--clear` is the cleanup interface (instead of subcommand style).
 - Shell integration commands are explicit: `cr3 install <nushell|zsh|bash>` and `cr3 completion <nushell|zsh|bash>`.
+- Shell completion script bodies are maintained as embedded template files with shell-aware suffixes (`*.tmpl.nu`, `*.tmpl.zsh`, `*.tmpl.sh`) for readability and editor syntax highlighting.
 - Nushell root completion (`cr3 <TAB>`) surfaces curated example commands with descriptions before standard directory/file suggestions.
 - README acts as source-of-truth for operational behavior and user docs.
 - Development docs prefer [`mise`](https://mise.jdx.dev) first, with `goenv` as an alternative.
 - Editor tooling (`gopls`) depends on the editor process PATH; if `go` is missing from PATH, `go list`-based analysis will fail even when `mise` is configured.
 - Go runtime version is pinned in `.mise.toml` (`[tools] go = "1.22.5"`); contributors using `mise` should run `mise install` in the project.
-- End-session `.agents` workflow applies `memento`, `shell-completions`, `ai-janitor`, `tests`, and `docs` skills in that order.
-- `docs` skill updates root `README.md` only when changes include at least one non-`.agents` file.
+- End-session `.agents` workflow applies `memento`, `ai-janitor`, `tests`, and `docs` skills in that order.
+- `docs` skill updates root `README.md` only when changes include at least one non-`.agents` file and also owns shell-completion/man-page doc alignment guidance, including external-tool command tracking in manpage sections.
 - `tests` skill updates/runs existing unit tests only; it must not create new test files.
 - `failures.md` should contain only real failed attempts; if none occurred in a session, add no failure entry.
 - Mermaid diagrams in Markdown should be GitHub-safe: use simple alphanumeric node IDs (e.g., `endSession` instead of reserved words like `end`), keep display text in brackets, and avoid Mermaid reserved keywords as node identifiers.
@@ -64,7 +65,7 @@
 - Maintain robust LM Studio client behavior and diagnostics.
 - Keep `.agents` memory files synchronized with thread history and recent architectural decisions.
 
-- Keep end-session guardrails active for shell-completion sync, test maintenance, and conditional README updates.
+- Keep end-session guardrails active for docs + shell completion/man-page alignment, test maintenance, and conditional README updates.
 - Preserve Nushell completion UX where curated top-of-list examples do not change downstream directory/CR3 completion behavior.
 
 ## Historical Thread Digest

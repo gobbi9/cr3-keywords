@@ -16,11 +16,11 @@ func Script(target, commandName string) (string, error) {
 
 	switch target {
 	case "nushell":
-		return renderNushellModule(commandName), nil
+		return renderNushellModule(commandName)
 	case "zsh":
-		return renderZshCompletion(commandName), nil
+		return renderZshCompletion(commandName)
 	case "bash":
-		return renderBashCompletion(commandName), nil
+		return renderBashCompletion(commandName)
 	default:
 		return "", fmt.Errorf("unsupported completion target: %s", target)
 	}

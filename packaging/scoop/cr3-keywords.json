@@ -10,6 +10,10 @@
     }
   },
   "bin": [["cr3_{{VERSION}}_windows-amd64.exe", "cr3"]],
+  "suggest": {
+    "ExifTool (optional, enables --exif fast path)": "extras/exiftool"
+  },
+  "notes": ["Windows does not use Unix man pages. Use: cr3 --help"],
   "checkver": {
     "github": "gobbi9/cr3-keywords"
   },
